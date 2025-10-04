@@ -1,20 +1,146 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Test Login</title>
+    <title>Company Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f9f9f9;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #004080;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+        }
+
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .navbar h1 {
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .navbar .menu a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+
+        .navbar .menu a:hover {
+            text-decoration: underline;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 400px;
+            margin: 60px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .container h2 {
+            color: #004080;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-top: 10px;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            margin-top: 20px;
+            background-color: #004080;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0066cc;
+        }
+
+        .info-text {
+            font-size: 14px;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        .info-text a {
+            color: #004080;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .info-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h1>Login Test</h1>
-    <form action="client.php" method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
-        
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
-        
-        <input type="hidden" name="request_type" value="login">
-        
-        <input type="submit" value="Log In">
-    </form>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="logo">
+            <img src="logo.png" alt="Company Logo"> <!-- Placeholder for company logo -->
+            <h1>MyCompany</h1>
+        </div>
+        <div class="menu">
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="register.html">Register</a>
+            <a href="#">Contact</a>
+        </div>
+    </div>
+
+    <!-- Login Container -->
+    <div class="container">
+        <h2>Welcome</h2>
+        <p>Please insert your credentials to log in.</p>
+
+        <form action="client.php" method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <input type="hidden" name="request_type" value="login">
+            <input type="submit" value="Log In">
+        </form>
+
+        <p class="info-text">
+            If you are a new user, please select the <a href="register.html">Register</a> button to create a new account.
+        </p>
+    </div>
+
 </body>
 </html>
+
