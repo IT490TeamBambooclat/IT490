@@ -1,0 +1,123 @@
+<?php
+session_start();
+if (!isset($_SESSION['username'])) {
+    header("Location: login.html");
+    exit;
+}
+$username = htmlspecialchars($_SESSION['username']);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home - Welcome <?php echo $username; ?></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f9f9f9;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #004080;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 25px;
+        }
+
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .navbar .menu a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+
+        .navbar .menu a:hover {
+            text-decoration: underline;
+        }
+
+        /* Main content */
+        .container {
+            max-width: 600px;
+            margin: 80px auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #004080;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #333;
+            font-size: 16px;
+        }
+
+        .logout-btn {
+            margin-top: 30px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .logout-btn:hover {
+            background-color: #c9302c;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <div class="logo">
+        <img src="logo.png" alt="Company Logo">
+        <h1>MyCompany</h1>
+    </div>
+    <div class="menu">
+        <a href="home.php">Home</a>
+        <a href="recommendations.php">Recommendations</a>
+        <a href="profile.php">Profile</a>
+        <a href="logout.php">Logout</a>
+    </div>
+</div>
+
+<!-- Welcome Section -->
+<div class="container">
+    <h2>Welcome, <?php echo $username; ?>!</h2>
+    <p>You are successfully signed in.</p>
+    <p>Use the navigation bar above to explore your dashboard, view recommendations, or manage your account.</p>
+
+    <form action="logout.php" method="POST">
+        <button type="submit" class="logout-btn">Log Out</button>
+    </form>
+</div>
+
+</body>
+</html>
+
