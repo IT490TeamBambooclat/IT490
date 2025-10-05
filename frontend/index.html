@@ -3,6 +3,7 @@
 <head>
     <title>Company Login Page</title>
     <style>
+        /* ... (CSS from original index.html) ... */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -106,11 +107,9 @@
 </head>
 <body>
 
-    <!-- Navigation Bar -->
     <div class="navbar">
         <div class="logo">
-            <img src="logo.png" alt="Company Logo"> <!-- Placeholder for company logo -->
-            <h1>MyCompany</h1>
+            <img src="logo.png" alt="Company Logo"> <h1>MyCompany</h1>
         </div>
         <div class="menu">
             <a href="#">Home</a>
@@ -120,19 +119,17 @@
         </div>
     </div>
 
-    <!-- Login Container -->
     <div class="container">
         <h2>Welcome</h2>
         <p>Please insert your credentials to log in.</p>
 
-        <form action="client.php" method="POST">
+        <form action="login.php" method="POST">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
             
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
 
-            <input type="hidden" name="request_type" value="login">
             <input type="submit" value="Log In">
         </form>
 
@@ -143,4 +140,3 @@
 
 </body>
 </html>
-

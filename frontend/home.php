@@ -1,51 +1,118 @@
 <?php
+require_once('path.inc');
+require_once('get_host_info.inc');
+require_once('rabbitMQLib.inc');
+
 session_start();
 
-// Redirect user back to login page if not logged in
-if (!isset($_SESSION['username'])) {
-    header("Location: login.html");
+// Check for session existence and validate with the authentication server
+if (!isset($_SESSION['username']) || !isset($_SESSION['session_id'])) {
+    header("Location: index.html"); // Redirect to index.html (login page)
+    exit;
+}
+
+// 1. Create RabbitMQ client instance
+$client = new rabbitMQClient("testRabbitMQ.ini", "testServer");
+
+// 2. Prepare request for session validation
+$validation_request = [
+    'type' => 'validate_session',
+    'sessionId' => $_SESSION['session_id']
+];
+
+// 3. Send request and get response (true or false)
+$is_session_valid = $client->send_request($validation_request);
+
+// 4. Handle validation response
+if ($is_session_valid !== true) {
+    // Session is invalid (expired or non-existent), log out user
+    session_unset();
+    session_destroy();
+    header("Location: index.html?error=session_expired");
     exit;
 }
 
 $username = htmlspecialchars($_SESSION['username']);
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Home - Welcome <?php echo $username; ?></title>
     <style>
+        /* ... (CSS from the original home.html file) ... */
         body {
             font-family: Arial, sans-serif;
-            background-color: #eef2f3;
-            text-align: center;
-            padding-top: 100px;
+            margin: 0;
+            background-color: #f9f9f9;
         }
 
+        /* Navbar */
+        .navbar {
+            background-color: #004080;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 25px;
+        }
+
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .navbar .menu a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+
+        .navbar .menu a:hover {
+            text-decoration: underline;
+        }
+
+        /* Main content */
         .container {
+            max-width: 600px;
+            margin: 80px auto;
             background-color: white;
-            width: 400px;
-            margin: auto;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
         }
 
-        h1 {
+        h2 {
             color: #004080;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #333;
+            font-size: 16px;
         }
 
         .logout-btn {
-            display: inline-block;
-            margin-top: 20px;
+            margin-top: 30px;
             background-color: #d9534f;
             color: white;
-            padding: 10px 20px;
             border: none;
-            border-radius: 4px;
-            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 6px;
             cursor: pointer;
+            font-size: 15px;
         }
 
         .logout-btn:hover {
@@ -55,9 +122,23 @@ $username = htmlspecialchars($_SESSION['username']);
 </head>
 <body>
 
+<div class="navbar">
+    <div class="logo">
+        <img src="logo.png" alt="Company Logo">
+        <h1>MyCompany</h1>
+    </div>
+    <div class="menu">
+        <a href="home.php">Home</a>
+        <a href="recommendations.php">Recommendations</a>
+        <a href="profile.php">Profile</a>
+        <a href="logout.php">Logout</a>
+    </div>
+</div>
+
 <div class="container">
-    <h1>Welcome, <?php echo $username; ?>!</h1>
+    <h2>Welcome, <?php echo $username; ?>!</h2>
     <p>You are successfully signed in.</p>
+    <p>Use the navigation bar above to explore your dashboard, view recommendations, or manage your account.</p>
 
     <form action="logout.php" method="POST">
         <button type="submit" class="logout-btn">Log Out</button>
@@ -66,4 +147,3 @@ $username = htmlspecialchars($_SESSION['username']);
 
 </body>
 </html>
-

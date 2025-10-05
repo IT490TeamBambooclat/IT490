@@ -5,12 +5,14 @@ require_once('rabbitMQLib.inc');
 
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    // Note: The original returned 'returnCode' => 1 for error, keeping that structure
     echo json_encode(['returnCode' => 1, 'message' => 'Invalid request method']);
     exit;
 }
 
 // Get and sanitize inputs
 $username = trim($_POST['username'] ?? '');
+// $email is not used by server490.php's doRegister, but we'll still accept it from the form for now.
 $email = trim($_POST['email'] ?? '');
 $password = trim($_POST['password'] ?? '');
 
@@ -20,18 +22,14 @@ if (empty($username) || empty($email) || empty($password)) {
     exit;
 }
 
-// (Optional) Password hashing for security
-// $password = password_hash($password, PASSWORD_BCRYPT);
-
 // Create RabbitMQ client
 $client = new rabbitMQClient("testRabbitMQ.ini", "testServer");
 
-// Prepare request
+// Prepare request: Change 'type' to 'register' and use 'password' key
 $request = [
-    'type' => 'makeUser',
+    'type' => 'register',
     'username' => $username,
-    'email' => $email,
-    'password' => $password
+    'password' => $password // server490.php expects this key
 ];
 
 // Send and receive response
@@ -41,11 +39,13 @@ $response = $client->send_request($request);
 error_log("Register response: " . json_encode($response));
 
 // Return JSON response to frontend
-if (isset($response['returnCode']) && $response['returnCode'] == 0) {
+// server490.php's doRegister returns true (successful) or false (failed, e.g., user exists)
+// The $response will be true (1) or false (0)
+if ($response === true || (is_array($response) && isset($response['returnCode']) && $response['returnCode'] == 0)) {
     echo json_encode(['returnCode' => 0, 'message' => 'Registration successful! You can now log in.']);
 } else {
-    $message = $response['message'] ?? 'Registration failed. Try a different username or email.';
+    // Note: server490.php only returns false on failure, so we assume a generic message.
+    $message = 'Registration failed. The username may already be taken.';
     echo json_encode(['returnCode' => 1, 'message' => $message]);
 }
 ?>
-
