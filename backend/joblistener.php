@@ -54,4 +54,4 @@ $server = new rabbitMQServer("testRabbitMQ.ini",$JOB_QUEUE_SERVER);
 
 error_log("Job Data Listener started and waiting for messages on queue: " . $JOB_QUEUE_SERVER . "...");
 $server->process_requests('requestProcessor');
-?
+?>
