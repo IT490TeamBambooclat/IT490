@@ -20,10 +20,10 @@ function doIngestJobData($title, $organization, $location, $date_posted) {
                             VALUES (?, ?, ?, ?)");
     
     if ($stmt->execute([$title, $organization, $location, $date_posted])) {
-        error_log("SUCCESS: Ingested job: " . $title);
+        error_log("SUCCESS: Inserted job: " . $title);
         return true;
     } else {
-        error_log("FAILURE: Failed to ingest job: " . $title . " - DB Error: " . json_encode($stmt->errorInfo()));
+        error_log("FAILURE: Failed to insert job: " . $title . " - DB Error: " . json_encode($stmt->errorInfo()));
         return false;
     }
 }
@@ -40,13 +40,13 @@ function requestProcessor($req) {
         );
 
         if ($result) {
-             return ['returnCode' => 0, 'message' => 'Data ingested successfully'];
+             return ['returnCode' => 0, 'message' => 'Data inserted successfully'];
         } else {
-             return ['returnCode' => 1, 'message' => 'Database ingestion failed'];
+             return ['returnCode' => 1, 'message' => 'Data insertion failed'];
         }
     }
     
-    error_log("Unknown request type received in job_listener: " . json_encode($req));
+    error_log("Unknown request type received in joblistener script: " . json_encode($req));
     return ['returnCode' => 1, 'message' => 'Invalid request type for this listener'];
 }
 
