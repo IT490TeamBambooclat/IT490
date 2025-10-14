@@ -34,7 +34,7 @@ $username = htmlspecialchars($_SESSION['username']);
 </head>
 <body>
 <div class="navbar">
-    <div><img src="logo.png" style="height:34px;vertical-align:middle"> MyCompany</div>
+    <div><img src="logo.png" style="height:34px;vertical-align:middle"> JobConnect </div>
     <div>Hi, <?php echo $username; ?> | <a href="logout.php" style="color:#fff">Logout</a></div>
 </div>
 
