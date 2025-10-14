@@ -48,5 +48,7 @@ $username = htmlspecialchars($_SESSION['username']);
         </form>
     </div>
 </div>
+<?php include('chat_widget.php'); ?>
+
 </body>
 </html>
