@@ -144,6 +144,7 @@ $username = htmlspecialchars($_SESSION['username']);
         <button type="submit" class="logout-btn">Log Out</button>
     </form>
 </div>
+<?php include('chat_widget.php'); ?>
 
 </body>
 </html>
