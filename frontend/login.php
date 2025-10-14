@@ -42,11 +42,12 @@ error_log("RabbitMQ login response: " . json_encode($response));
 // Handle RabbitMQ response
 if ($response !== false && is_string($response) && !empty($response)) {
     // Successful login: $response contains the Session ID
+   // Successful login: $response contains the Session ID
     $_SESSION['username'] = $username;
     $_SESSION['session_id'] = $response; // Store the session ID from the server
 
-    // Redirect to home.php
-    header("Location: home.php");
+    // Redirect to role selection (let user pick Job Seeker or Employer)
+    header("Location: role_select.php");
     exit;
 } else {
     // Login failed
