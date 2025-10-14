@@ -28,7 +28,7 @@ button{background:#004080;color:#fff;padding:10px 14px;border:none;border-radius
 </head>
 <body>
 <div class="navbar">
-    <div><img src="logo.png" style="height:34px;vertical-align:middle"> MyCompany</div>
+    <div><img src="logo.png" style="height:34px;vertical-align:middle"> JobConnect</div>
     <div>Signed in: <?php echo $username; ?> | <a href="logout.php" style="color:#fff">Logout</a></div>
 </div>
 
