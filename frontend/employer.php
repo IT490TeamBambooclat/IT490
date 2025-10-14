@@ -62,5 +62,7 @@ button{background:#004080;color:#fff;padding:10px 14px;border:none;border-radius
         </form>
     </div>
 </div>
+<?php include('chat_widget.php'); ?>
+
 </body>
 </html>
