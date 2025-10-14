@@ -1,0 +1,82 @@
+
+# DATABASE VM FIREWALL CONFIGURATION DOCUMENTATION
+# Host: Database VM (100.92.225.34)
+# Purpose: Allow access ONLY from RabbitMQ VM (100.102.99.71)
+
+# 1. RESET AND BASELINE CONFIGURATION
+sudo ufw reset
+sudo ufw default deny incoming
+sudo ufw default deny outgoing
+
+
+# 2. ALLOW ONLY RABBITMQ COMMUNICATION
+-
+# Allow inbound MySQL traffic from RabbitMQ VM
+sudo ufw allow in from 100.102.99.71 to any port 3306 comment 'Allow RabbitMQ access to DB'
+
+# Allow outbound replies back to RabbitMQ
+sudo ufw allow out to 100.102.99.71 port 3306 comment 'Allow DB replies to RabbitMQ'
+
+
+# 3. ALLOW ONLY RABBITMQ ICMP (PING)
+
+sudo ufw allow in from 100.102.99.71 proto icmp comment 'Allow ICMP (ping) from RabbitMQ'
+sudo ufw allow out to 100.102.99.71 proto icmp comment 'Allow ICMP replies to RabbitMQ'
+
+
+# 4. OPTIONAL SSH ACCESS (OVER TAILSCALE)
+
+sudo ufw allow in from 100.0.0.0/8 to any port 22 comment 'Allow SSH over Tailscale'
+
+
+# 5. LIMIT ALL OTHER TRAFFIC ON TAILSCALE INTERFACE
+
+sudo ufw deny in on tailscale0 from any comment 'Deny all inbound except RabbitMQ'
+sudo ufw deny out on tailscale0 to any comment 'Deny all outbound except RabbitMQ'
+sudo ufw allow in on tailscale0 from 100.102.99.71 comment 'Allow RabbitMQ inbound'
+sudo ufw allow out on tailscale0 to 100.102.99.71 comment 'Allow RabbitMQ outbound'
+
+
+# 6. EDITED CONFIG FILES
+
+
+# (a) /etc/default/ufw
+# Ensures UFW drops everything by default, including Tailscale
+sudo nano /etc/default/ufw
+# Make sure the following lines are set:
+#   MANAGE_BUILTINS=yes
+#   DEFAULT_INPUT_POLICY="DROP"
+
+# (b) /etc/ufw/before.rules
+# Restrict ICMP echo-request (ping) to RabbitMQ VM only
+sudo nano /etc/ufw/before.rules
+# Find the line:
+#   -A ufw-before-input -p icmp --icmp-type echo-request -j ACCEPT
+# Comment it out and replace with:
+#   # Allow ping (ICMP echo-request) only from RabbitMQ VM
+#   -A ufw-before-input -p icmp --icmp-type echo-request -s 100.102.99.71 -j ACCEPT
+#   # Drop all other ping requests
+#   -A ufw-before-input -p icmp --icmp-type echo-request -j DROP
+
+
+# 7. APPLY AND VERIFY
+
+sudo ufw enable
+sudo ufw reload
+sudo ufw status verbose
+
+# Confirm rules applied correctly
+sudo iptables -L | grep icmp
+sudo ufw status numbered
+
+
+# 8. TEST CONNECTIVITY
+
+# From RabbitMQ VM:
+#   ping 100.92.225.34           # should succeed
+#   nc -zv 100.92.225.34 3306    # should connect
+# From any other VM:
+#   ping 100.92.225.34           # should fail (100% loss)
+#   nc -zv 100.92.225.34 3306    # should fail or time out
+
+
