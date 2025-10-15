@@ -3,7 +3,6 @@
 <head>
     <title>JobConnect Login Page</title>
     <style>
-        /* ... (CSS from original index.html) ... */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -46,10 +45,52 @@
             text-decoration: underline;
         }
 
+        /* Intro Section */
+        .intro {
+            max-width: 800px;
+            margin: 40px auto 20px auto;
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            animation: fadeInUp 1.2s ease forwards;
+        }
+
+        .intro h2 {
+            color: #004080;
+            font-size: 28px;
+            margin-bottom: 10px;
+            animation: textFadeIn 1.5s ease forwards;
+        }
+
+        .intro p {
+            color: #333;
+            font-size: 17px;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes textFadeIn {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
         /* Main Content */
         .container {
             max-width: 400px;
-            margin: 60px auto;
+            margin: 40px auto 60px auto;
             padding: 20px;
             background-color: white;
             border-radius: 10px;
@@ -109,7 +150,8 @@
 
     <div class="navbar">
         <div class="logo">
-            <img src="logo.png" alt="Company Logo"> <h1>JobConnect</h1>
+            <img src="logo.png" alt="Company Logo"> 
+            <h1>JobConnect</h1>
         </div>
         <div class="menu">
             <a href="#">Home</a>
@@ -119,8 +161,17 @@
         </div>
     </div>
 
+    <!-- New Intro Section -->
+    <div class="intro">
+        <h2>Welcome to JobConnect</h2>
+        <p><strong>JobConnect</strong> is your all-in-one career platform designed to simplify your job search. 
+        We gather listings from multiple job APIs across the web, giving you access to a wider range of opportunities in one place. 
+        Create your profile, explore jobs, and connect directly with employers — all within a secure, modern interface.</p>
+        <p>💼 <em>Find jobs. Apply faster. Stay connected.</em></p>
+    </div>
+
     <div class="container">
-        <h2>Welcome</h2>
+        <h2>Login</h2>
         <p>Please insert your credentials to log in.</p>
 
         <form action="login.php" method="POST">
