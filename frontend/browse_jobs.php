@@ -29,14 +29,14 @@ if (!$response || empty($response)) {
 } else {
     foreach ($response as $job) {
         $title = htmlspecialchars($job['title'] ?? 'Untitled');
-        $employer = htmlspecialchars($job['employer'] ?? '');
+        $employer = htmlspecialchars($job['organization'] ?? '');
         $loc = htmlspecialchars($job['location'] ?? '');
-        $desc = htmlspecialchars($job['description'] ?? '');
+        $dateposted = htmlspecialchars($job['date_posted'] ?? '');
         $external = htmlspecialchars($job['external_link'] ?? '#');
         echo "<div class='job'>";
         echo "<h3>{$title}</h3>";
         echo "<p><strong>Employer:</strong> {$employer} &nbsp; <strong>Location:</strong> {$loc}</p>";
-        echo "<p>" . nl2br(substr($desc, 0, 600)) . (strlen($desc) > 600 ? "..." : "") . "</p>";
+        echo "<p>" . nl2br(substr($dateposted, 0, 600)) . (strlen($dateposted) > 600 ? "..." : "") . "</p>";
         echo "<p><a href='{$external}' target='_blank'>More / Apply</a></p>";
         echo "</div>";
     }
