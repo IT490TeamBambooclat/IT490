@@ -81,7 +81,31 @@ function doGetJobs($scope, $organization = null) {
     
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
+function doSearchJobsLocal($query) {
+    error_log("Attempting local job search for query: " . $query);
+    if (empty($query)) {
+        return ['results' => []];
+    }
+    
+    $pdo = getPDO();
+    // Use 'title', 'organization', 'location', and a placeholder for 'apply_link' and 'summary'
+    // to match the expected structure of the frontend display logic.
+    $select_fields = "job_title as title, organization, location, date_posted, CONCAT('ID:', id) as apply_link, 'Local job post.' as summary";
+    
+    // Use LIKE to find the query string anywhere in the job title or organization.
+    $sql = "SELECT $select_fields
+            FROM jobs_data
+            WHERE job_title LIKE ? OR organization LIKE ?
+            ORDER BY ingestion_date DESC";
+    
+    $search_param = "%" . $query . "%";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$search_param, $search_param]);
+    
+    // Package results in the expected format
+    return ['results' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
+}
 
 function requestProcessor($req) {
     if (!isset($req['type'])) {
