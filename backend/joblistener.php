@@ -13,17 +13,27 @@ function getPDO() {
     return new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 }
 
-function doIngestJobData($title, $organization, $location, $date_posted) {
-    $pdo = getPDO();
-    $stmt = $pdo->prepare("INSERT INTO jobs_data 
-                            (job_title, organization, location, date_posted) 
-                            VALUES (?, ?, ?, ?)");
+function doIngestJobData($position_id, $title, $organization, $location, $date_posted) {
     
-    if ($stmt->execute([$title, $organization, $location, $date_posted])) {
-        error_log("SUCCESS: Inserted job: " . $title);
+    $pdo = getPDO();
+    
+    $sql = "INSERT INTO jobs_data 
+            (position_id, job_title, organization, location, date_posted) 
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+            job_title = VALUES(job_title), 
+            organization = VALUES(organization),
+            location = VALUES(location),
+            date_posted = VALUES(date_posted),
+            ingestion_date = NOW();";
+
+    $stmt = $pdo->prepare($sql);
+    
+    if ($stmt->execute([$position_id, $title, $organization, $location, $date_posted])) {
+        error_log("SUCCESS: Processed job ID: " . $position_id);
         return true;
     } else {
-        error_log("FAILURE: Failed to insert job: " . $title . " - DB Error: " . json_encode($stmt->errorInfo()));
+        error_log("FAILURE: Failed to process job ID: " . $position_id . " - DB Error: " . json_encode($stmt->errorInfo()));
         return false;
     }
 }
@@ -32,7 +42,9 @@ function requestProcessor($req) {
     error_log("Received job data request: " . json_encode($req));
     
     if (isset($req['type']) && $req['type'] == 'ingest_job_data') {
+        
         $result = doIngestJobData(
+            $req['position_id'] ?? null,
             $req['job_title'] ?? 'N/A', 
             $req['organization'] ?? 'N/A', 
             $req['location'] ?? 'N/A',
@@ -40,17 +52,17 @@ function requestProcessor($req) {
         );
 
         if ($result) {
-             return ['returnCode' => 0, 'message' => 'Data inserted successfully'];
+             return ['returnCode' => 0, 'message' => 'Data ingested successfully'];
         } else {
-             return ['returnCode' => 1, 'message' => 'Data insertion failed'];
+             return ['returnCode' => 1, 'message' => 'Database ingestion failed'];
         }
     }
     
-    error_log("Unknown request type received in joblistener script: " . json_encode($req));
+    error_log("Unknown request type received in job_listener: " . json_encode($req));
     return ['returnCode' => 1, 'message' => 'Invalid request type for this listener'];
 }
 
-$server = new rabbitMQServer("testRabbitMQ.ini",$JOB_QUEUE_SERVER);
+$server = new rabbitMQServer("testRabbitMQ.ini", $JOB_QUEUE_SERVER);
 
 error_log("Job Data Listener started and waiting for messages on queue: " . $JOB_QUEUE_SERVER . "...");
 $server->process_requests('requestProcessor');
