@@ -23,7 +23,7 @@
             margin-top: 10px;
             text-align: left;
         }
-        input[type="text"], input[type="password"], input[type="email"] {
+        input[type="text"], input[type="password"], input[type="email"], input[type="tel"] {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
@@ -45,6 +45,9 @@
             margin-top: 15px;
             color: #333;
         }
+        /* (Added) small helper style for fieldset */
+        fieldset { border: 1px solid #ddd; border-radius: 6px; padding: 10px; margin-top: 16px; text-align: left; }
+        legend { font-weight: bold; color: #004080; }
     </style>
 </head>
 <body>
@@ -63,6 +66,30 @@
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
 
+        <!-- ========================= ADDED: Job Alerts (optional) ========================= -->
+        <fieldset>
+            <legend>Job Alerts (optional)</legend>
+
+            <label style="margin-top:8px;">
+                <input type="checkbox" id="alertEmailEnabled">
+                Email notifications
+            </label>
+            <input type="email" id="alertEmail" placeholder="you@example.com">
+
+            <label style="margin-top:8px;">
+                <input type="checkbox" id="alertSmsEnabled">
+                Text (SMS) notifications
+            </label>
+            <input type="tel" id="alertPhone" placeholder="+1 555 123 4567">
+
+            <label for="alertKeywords" style="margin-top:8px;">Keywords (comma separated)</label>
+            <input type="text" id="alertKeywords" placeholder="IT, Security, DevOps">
+
+            <label for="alertLocation" style="margin-top:8px;">Preferred location</label>
+            <input type="text" id="alertLocation" placeholder="NYC or Remote">
+        </fieldset>
+        <!-- ======================= END ADDED: Job Alerts (optional) ======================= -->
+
         <button type="submit">Register</button>
     </form>
 
@@ -80,6 +107,15 @@ function sendRegisterRequest() {
         return;
     }
 
+    // ===== ADDED: read Job Alerts fields (optional) =====
+    const alertEmailEnabled = document.getElementById("alertEmailEnabled").checked ? 1 : 0;
+    const alertSmsEnabled   = document.getElementById("alertSmsEnabled").checked ? 1 : 0;
+    const alertEmail        = document.getElementById("alertEmail").value.trim();
+    const alertPhone        = document.getElementById("alertPhone").value.trim();
+    const alertKeywords     = document.getElementById("alertKeywords").value.trim();
+    const alertLocation     = document.getElementById("alertLocation").value.trim();
+    // ====================================================
+
     const request = new XMLHttpRequest();
     request.open("POST", "register.php", true);
     request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -94,12 +130,25 @@ function sendRegisterRequest() {
                 // Redirect to login page after 2 seconds
                 setTimeout(() => window.location.href = "index.html", 2000);//back at login
             }
+        } else if (this.readyState === 4) {
+            document.getElementById("textResponse").innerHTML = "An error occurred. Please try again.";
         }
     };
 
-    request.send("username=" + encodeURIComponent(username) +
-                 "&email=" + encodeURIComponent(email) +
-                 "&password=" + encodeURIComponent(password));
+    // NOTE: Only additions below — original fields unchanged; we append alerts fields
+    request.send(
+        "username=" + encodeURIComponent(username) +
+        "&email=" + encodeURIComponent(email) +
+        "&password=" + encodeURIComponent(password) +
+        // ===== ADDED: include Job Alerts fields in POST =====
+        "&alerts_email_enabled=" + alertEmailEnabled +
+        "&alerts_sms_enabled=" + alertSmsEnabled +
+        "&alerts_email=" + encodeURIComponent(alertEmail) +
+        "&alerts_phone=" + encodeURIComponent(alertPhone) +
+        "&alerts_keywords=" + encodeURIComponent(alertKeywords) +
+        "&alerts_location=" + encodeURIComponent(alertLocation)
+        // ====================================================
+    );
 }
 </script>
 
