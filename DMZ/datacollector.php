@@ -22,8 +22,7 @@ function fetchAndQueueJobData() {
 
     while ($has_more_pages) {
         
-        $url = $API_HOST . 
-               "?Keyword=IT" . 
+        $url = $API_HOST."?Keyword=IT" . 
                "&ResultsPerPage=" . $results_per_page . 
                "&Page=" . $page;
 
@@ -64,7 +63,7 @@ function fetchAndQueueJobData() {
             $request = [
                 'type' => 'ingest_job_data', 
                 'position_id' => $jobDetails['PositionID'] ?? null, 
-                'job_title' => $jobDetails['PositionTitle'] ?? 'N/A',
+                'job_title' => $jobDetails['PositionTitle'] ?? 'N/A',    //////// I think this is where we pick the information we get from the api.
                 'organization' => $jobDetails['OrganizationName'] ?? 'N/A',
                 'location' => implode(', ', array_column($jobDetails['PositionLocations'] ?? [], 'LocationName')), 
                 'date_posted' => $jobDetails['PublicationStartDate'] ?? null
