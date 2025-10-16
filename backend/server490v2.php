@@ -131,6 +131,8 @@ function requestProcessor($req) {
                 $req['location'] ?? ''
                 // Ignored frontend fields: salary, external_link, description
             );
+        case "search_jobs_local": // <-- NEW: Handle local search
+            return doSearchJobsLocal($req['query'] ?? '');
             
         case "get_jobs": 
             $scope = $req['scope'] ?? 'all';
