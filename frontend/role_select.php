@@ -22,7 +22,7 @@ $username = htmlspecialchars($_SESSION['username']);
 </head>
 <body>
 <div class="navbar">
-    <div><img src="logo.png" alt="logo" style="height:36px;vertical-align:middle;"> <strong>MyCompany</strong></div>
+    <div><img src="logo.png" alt="logo" style="height:36px;vertical-align:middle;"> <strong>JobConnect</strong></div>
     <div>Signed in as <?php echo $username; ?> | <a href="logout.php" style="color:#fff;text-decoration:none;margin-left:10px;">Logout</a></div>
 </div>
 
