@@ -60,8 +60,8 @@ function doPostJob($title, $organization, $location) {
 function doGetJobs($scope, $organization = null) {
     $pdo = getPDO();
     
-    // Select the necessary fields (title, location, date_posted, organization, description, external_link)
-    $select_fields = "job_title as title, organization, location, date_posted, description, external_link";
+    // Select the necessary fields (title, location, date_posted, organization)
+    $select_fields = "job_title as title, organization, location, date_posted";
     
     $sql = "SELECT $select_fields
             FROM jobs_data 
