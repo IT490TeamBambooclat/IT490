@@ -52,22 +52,24 @@ function doPostJob($title, $organization, $location) {
     $stmt = $pdo->prepare("INSERT INTO jobs_data 
                             (job_title, organization, location, date_posted) 
                             VALUES (?, ?, ?, CURDATE())");
-    // Note: The frontend sends salary, external_link, and description, but they are ignored here
+    // external_link and description are ignored here
     return $stmt->execute([$title, $organization, $location]); 
 }
 
-// CORRECTED FUNCTION: Only selects the columns available in jobs_data table
+
 function doGetJobs($scope, $organization = null) {
     $pdo = getPDO();
     
-    // Select only the fields available in the provided CREATE TABLE script.
-    $sql = "SELECT job_title as title, organization, location, date_posted
+    // Select the necessary fields (title, location, date_posted, organization, description, external_link)
+    $select_fields = "job_title as title, organization, location, date_posted, description, external_link";
+    
+    $sql = "SELECT $select_fields
             FROM jobs_data 
-            ORDER BY ingestion_date DESC"; // Use ingestion_date for most recent
+            ORDER BY ingestion_date DESC";
     $params = [];
     
     if ($scope === 'employer' && $organization) {
-        $sql = "SELECT job_title as title, organization, location, date_posted 
+        $sql = "SELECT $select_fields
                 FROM jobs_data 
                 WHERE organization = ? 
                 ORDER BY ingestion_date DESC";
