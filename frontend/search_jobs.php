@@ -15,7 +15,7 @@ if ($q === '') {
 
 // prepare request for MQ consumer that will call USAJOBS API
 $request = [
-    'type' => 'usajobs_search',
+    'type' => 'doSearchJobsLocal',
     'query' => $q,
     'page' => intval($_GET['page'] ?? 1),
     'per_page' => intval($_GET['per_page'] ?? 20)
