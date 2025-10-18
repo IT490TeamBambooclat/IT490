@@ -63,10 +63,13 @@ function fetchAndQueueJobData() {
             $request = [
                 'type' => 'ingest_job_data', 
                 'position_id' => $jobDetails['PositionID'] ?? null, 
-                'job_title' => $jobDetails['PositionTitle'] ?? 'N/A',    //////// I think this is where we pick the information we get from the api.
+                'job_title' => $jobDetails['PositionTitle'] ?? 'N/A',
                 'organization' => $jobDetails['OrganizationName'] ?? 'N/A',
-                'location' => implode(', ', array_column($jobDetails['PositionLocations'] ?? [], 'LocationName')), 
-                'date_posted' => $jobDetails['PublicationStartDate'] ?? null
+                'location' => implode(', ', array_column($jobDetails['PositionLocation'] ?? [], 'LocationName')), 
+                'date_posted' => $jobDetails['PublicationStartDate'] ?? null,
+                'apply_uri' => ($jobDetails['ApplyURI'][0]) ?? 'N/A', 
+                'qualification_summary' => $jobDetails['QualificationSummary'] ?? 'N/A',
+                'major_duties' => implode('; ', $jobDetails['UserArea']['Details']['MajorDuties'] ?? [])
             ];
             
             $client->publish($request); 
