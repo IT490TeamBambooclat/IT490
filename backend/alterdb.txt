@@ -1,0 +1,4 @@
+ALTER TABLE jobs_data
+ADD COLUMN apply_uri VARCHAR(2083) DEFAULT NULL,
+ADD COLUMN qualification_summary TEXT DEFAULT NULL,
+ADD COLUMN major_duties TEXT DEFAULT NULL;
