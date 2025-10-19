@@ -10,11 +10,11 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'employer') {
 $employer = $_SESSION['username'];
 $title = trim($_POST['title'] ?? '');
 $location = trim($_POST['location'] ?? '');
-$salary = trim($_POST['salary'] ?? '');
+$qualifications = trim($_POST['qualifications'] ?? '');
 $external_link = trim($_POST['external_link'] ?? '');
-$description = trim($_POST['description'] ?? '');
+$major_duties = trim($_POST['description'] ?? '');
 
-if ($title === '' || $description === '') {
+if ($title === '' || $major_duties === '') {
     header("Location: employer.php?error=required");
     exit;
 }
@@ -25,9 +25,9 @@ $request = [
     'employer' => $employer,
     'title' => $title,
     'location' => $location,
-    'salary' => $salary,
+    'qualifications' => $qualifications,
     'external_link' => $external_link,
-    'description' => $description,
+    'description' => $major_duties,
     'posted_at' => date(DATE_ATOM)
 ];
 

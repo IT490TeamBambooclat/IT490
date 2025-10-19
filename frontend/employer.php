@@ -42,11 +42,11 @@ button{background:#004080;color:#fff;padding:10px 14px;border:none;border-radius
             <input type="text" name="title" required>
             <label>Location</label>
             <input type="text" name="location">
-            <label>Salary / Compensation</label>
-            <input type="text" name="salary">
-            <label>External Link (application page)</label>
+            <label>Qualifications</label>
+            <input type="text" name="qualifications">
+            <label>External Link</label>
             <input type="text" name="external_link">
-            <label>Job Description</label>
+            <label>Major Duties</label>
             <textarea name="description" rows="6" required></textarea>
             <div style="margin-top:10px;">
                 <button type="submit">Post Job</button>
