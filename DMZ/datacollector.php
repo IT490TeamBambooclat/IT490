@@ -8,8 +8,25 @@ $API_KEY = "JARdgfQahwqDDdgixRjy/i7LyfIoEhmnJhwt9duouWM=";
 $USER_AGENT = "teambamboclaat@gmail.com"; 
 $JOB_QUEUE_SERVER = "DmzInfo"; 
 
+// Load Geo Location reference data
+$geoCodeData = json_decode('{
+    "CodeList": [{
+        "ValidValue": [{
+            "Code": "530539053",
+            "City": "Dupont",
+            "USCounty": "Pierce County",
+            "CountrySubdivision": "WA",
+            "Country": "US",
+            "LastModified": "2014-03-10T00:00:00",
+            "IsDisabled": "No"
+        }],
+        "id": "GeoLocCode"
+    }],
+    "DateGenerated": "2015-04-05T18:55:44.3995692-04:00"
+}', true);
+
 function fetchAndQueueJobData() {
-    global $API_HOST, $API_KEY, $USER_AGENT, $JOB_QUEUE_SERVER;
+    global $API_HOST, $API_KEY, $USER_AGENT, $JOB_QUEUE_SERVER, $geoCodeData;
 
     $client = new rabbitMQClient("testRabbitMQ.ini", $JOB_QUEUE_SERVER);
 
@@ -60,13 +77,26 @@ function fetchAndQueueJobData() {
         foreach ($jobs as $jobItem) {
             $jobDetails = $jobItem['MatchedObjectDescriptor'];
             
+            // Extract job data
+            $positionLocations = $jobDetails['PositionLocation'] ?? [];
+            $firstLocation = $positionLocations[0] ?? [];
+
+            // Match geo data
+            $geoInfo = $geoCodeData['CodeList'][0]['ValidValue'][0];
+            $geoMatch = ($firstLocation['LocationName'] ?? '') === $geoInfo['City'] ? $geoInfo : [];
+
             $request = [
                 'type' => 'ingest_job_data', 
                 'position_id' => $jobDetails['PositionID'] ?? null, 
-                'job_title' => $jobDetails['PositionTitle'] ?? 'N/A',    //////// I think this is where we pick the information we get from the api.
+                'job_title' => $jobDetails['PositionTitle'] ?? 'N/A',
                 'organization' => $jobDetails['OrganizationName'] ?? 'N/A',
-                'location' => implode(', ', array_column($jobDetails['PositionLocations'] ?? [], 'LocationName')), 
-                'date_posted' => $jobDetails['PublicationStartDate'] ?? null
+                'location' => implode(', ', array_column($positionLocations, 'LocationName')), 
+                'date_posted' => $jobDetails['PublicationStartDate'] ?? null,
+                'geo_code' => $geoMatch['Code'] ?? null,
+                'geo_city' => $geoMatch['City'] ?? null,
+                'geo_county' => $geoMatch['USCounty'] ?? null,
+                'geo_state' => $geoMatch['CountrySubdivision'] ?? null,
+                'geo_country' => $geoMatch['Country'] ?? null
             ];
             
             $client->publish($request); 
@@ -91,3 +121,4 @@ if (php_sapi_name() == 'cli') {
     echo "Access Denied: This script must be run from the command line (cron job).";
 }
 ?>
+
