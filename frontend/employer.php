@@ -24,6 +24,18 @@ body{font-family:Arial, sans-serif;background:#f6f8fb;margin:0}
 .panel{background:#fff;padding:16px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:16px}
 input, textarea{width:100%;padding:8px;margin-top:6px;box-sizing:border-box}
 button{background:#004080;color:#fff;padding:10px 14px;border:none;border-radius:6px;cursor:pointer}
+a.button-link {
+    display: inline-block;
+    background: #004080;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+}
+a.button-link:hover {
+    background: #0066cc;
+}
 </style>
 </head>
 <body>
@@ -61,7 +73,14 @@ button{background:#004080;color:#fff;padding:10px 14px;border:none;border-radius
             <button type="submit">View My Postings</button>
         </form>
     </div>
+
+    <!-- ✅ NEW PANEL TO VIEW APPLICANTS -->
+    <div class="panel">
+        <h3>Applicants for Your Jobs</h3>
+        <a href="view_applicants.php" class="button-link">View Applicants</a>
+    </div>
 </div>
+
 <?php include('chat_widget.php'); ?>
 
 </body>
