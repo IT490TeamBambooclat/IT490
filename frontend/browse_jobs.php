@@ -74,12 +74,13 @@ if (!$response || empty($response)) {
     echo "<p>No job postings available at the moment.</p>";
 } else {
     foreach ($response as $job) {
+        // We only need position_id and the $username for saving
         $position_id = htmlspecialchars($job['position_id'] ?? '');
         $title = htmlspecialchars($job['title'] ?? 'Untitled');
         $employer = htmlspecialchars($job['organization'] ?? 'N/A');
         $loc = htmlspecialchars($job['location'] ?? 'N/A');
         $dateposted = htmlspecialchars($job['date_posted'] ?? 'Unknown');
-        $external = htmlspecialchars($job['external_link'] ?? '#');
+        $external = htmlspecialchars($job['apply_uri'] ?? '#'); // Using apply_uri as per jobs_data table
 
         echo "<div class='job'>";
         echo "<h3>{$title}</h3>";
@@ -87,14 +88,13 @@ if (!$response || empty($response)) {
         echo "<p><strong>Posted:</strong> {$dateposted}</p>";
         echo "<p><a href='{$external}' target='_blank' class='apply-link' data-jobid='{$position_id}'>More / Apply</a></p>";
 
+        // --- UPDATED SAVE BUTTON: Only passing position_id and username ---
         echo "<button class='save-btn'
                 data-position-id='{$position_id}'
-                data-title='{$title}'
-                data-org='{$employer}'
-                data-location='{$loc}'
-                data-date='{$dateposted}'>
+                data-username='{$username}'>
                 Save Job
               </button>";
+        // -----------------------------------------------------------------
 
         echo "</div>";
     }
@@ -105,11 +105,11 @@ if (!$response || empty($response)) {
 document.querySelectorAll('.save-btn').forEach(button => {
     button.addEventListener('click', () => {
         const formData = new FormData();
+        
+        // --- UPDATED JAVASCRIPT: Only sending username and position_id ---
+        formData.append('username', button.dataset.username); 
         formData.append('position_id', button.dataset.positionId);
-        formData.append('job_title', button.dataset.title);
-        formData.append('organization', button.dataset.org);
-        formData.append('location', button.dataset.location);
-        formData.append('date_posted', button.dataset.date);
+        // -----------------------------------------------------------------
 
         fetch('save_job.php', {
             method: 'POST',

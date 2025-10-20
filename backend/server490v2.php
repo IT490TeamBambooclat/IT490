@@ -3,7 +3,58 @@
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
+function doGetSavedJobs($username) {
+    $pdo = getPDO();
+    
+    // SQL JOIN statement: Select details from jobs_data (jd) and the date_saved from saved_jobs (sj)
+    $sql = "SELECT 
+                jd.job_title AS title, 
+                jd.organization, 
+                jd.location, 
+                jd.date_posted, 
+                jd.apply_uri AS external_link,
+                jd.position_id,
+                sj.date_saved
+            FROM saved_jobs sj
+            JOIN jobs_data jd ON sj.position_id = jd.position_id
+            WHERE sj.username = ?";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$username]);
+    
+    // Return all resulting rows
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+function doSaveJob($username, $position_id) {
+    $pdo = getPDO();
+    
+    // 1. Check if the job actually exists in jobs_data
+    $stmt = $pdo->prepare("SELECT position_id FROM jobs_data WHERE position_id = ?");
+    $stmt->execute([$position_id]);
+    if (!$stmt->fetch()) {
+        return ['status' => 'error', 'message' => 'Job ID not found in database.'];
+    }
 
+    // 2. Check if the job is already saved by the user
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM saved_jobs WHERE username = ? AND position_id = ?");
+    $stmt->execute([$username, $position_id]);
+    if ($stmt->fetchColumn() > 0) {
+        return ['status' => 'error', 'message' => 'This job is already saved.'];
+    }
+
+    // 3. Insert the saved job record (only username and position_id)
+    $stmt = $pdo->prepare("INSERT INTO saved_jobs 
+                            (username, position_id, date_saved) 
+                            VALUES (?, ?, NOW())");
+                            
+    $success = $stmt->execute([$username, $position_id]);
+
+    if ($success) {
+        return ['status' => 'success', 'message' => 'Job saved. You can view it in your dashboard.'];
+    } else {
+        return ['status' => 'error', 'message' => 'Database insert failed.'];
+    }
+}
 function getPDO() {
     $dsn = "mysql:host=127.0.0.1;dbname=testdb;charset=utf8mb4";
     $user = "testUser";
@@ -102,7 +153,7 @@ function requestProcessor($req) {
     error_log("Received request type: " . $req['type']); 
     
     try { // <-- START OF ERROR HANDLING
-        switch ($req['type']) {
+	    switch ($req['type']) {
             case "register": 
                 return doRegister($req['username'],$req['password']);
             case "login": 
@@ -123,7 +174,14 @@ function requestProcessor($req) {
             case "get_jobs": 
                 $scope = $req['scope'] ?? 'all';
                 $organization = $req['organization'] ?? null;
-                return doGetJobs($scope, $organization);
+		return doGetJobs($scope, $organization);
+	    case "save_job":
+                return doSaveJob(
+                    $req['username'] ?? '',
+                    $req['position_id'] ?? ''
+		);
+	    case "get_saved_jobs":
+                return doGetSavedJobs($req['username'] ?? '');
                 
             default:
                 error_log("Unknown request type received: " . $req['type']);
