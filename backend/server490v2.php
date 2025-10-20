@@ -45,40 +45,26 @@ function doValidate($sid) {
 }
 
 // CORRECTED FUNCTION: Only uses the columns available in jobs_data table
-function doPostJob($title, $organization, $location) {
+function doPostJob($title, $organization, $location,$qualifications,$external_link,$description) {
     $pdo = getPDO();
-    // Insert only the fields available in the provided CREATE TABLE script.
-    // date_posted is set to today's date, ingestion_date defaults to CURRENT_TIMESTAMP.
     $stmt = $pdo->prepare("INSERT INTO jobs_data 
-                            (job_title, organization, location, date_posted) 
-                            VALUES (?, ?, ?, CURDATE())");
-    // external_link and description are ignored here
-    return $stmt->execute([$title, $organization, $location]); 
+                            (job_title, organization, location, date_posted, qualification_summary, apply_uri, major_duties) 
+                            VALUES (?, ?, ?, CURDATE(), ?, ?, ?)");
+    return $stmt->execute([$title, $organization, $location, $qualifications, $external_link, $description]); 
 }
 
 
 function doGetJobs($scope, $organization = null) {
     $pdo = getPDO();
-    
-    // Select the necessary fields (title, location, date_posted, organization)
-    $select_fields = "job_title as title, organization, location, date_posted";
-    
-    $sql = "SELECT $select_fields
-            FROM jobs_data 
-            ORDER BY ingestion_date DESC";
-    $params = [];
-    
-    if ($scope === 'employer' && $organization) {
-        $sql = "SELECT $select_fields
-                FROM jobs_data 
-                WHERE organization = ? 
-                ORDER BY ingestion_date DESC";
-        $params = [$organization];
+    $sql = "SELECT job_title AS title,organization,location,date_posted,major_duties,apply_uri,position_id from jobs_data";
+    $params=[];
+    if($organization!==null)
+    {
+	    $sql.= " Where organization = ?";
+	    $params[]=$organization;
     }
-    
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
-    
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 function doSearchJobsLocal($query) {
@@ -115,33 +101,42 @@ function requestProcessor($req) {
 
     error_log("Received request type: " . $req['type']); 
     
-    switch ($req['type']) {
-        case "register": 
-            return doRegister($req['username'],$req['password']);
-        case "login": 
-            return doLogin($req['username'],$req['password']);
-        case "validate_session": 
-            return doValidate($req['sessionId']);
-            
-        case "post_job": 
-            // Only using title, organization (from session), and location
-            return doPostJob(
-                $req['title'] ?? '',
-                $req['organization'] ?? '',
-                $req['location'] ?? ''
-                // Ignored frontend fields: salary, external_link, description
-            );
-        case "search_jobs_local": // <-- NEW: Handle local search
-            return doSearchJobsLocal($req['query'] ?? '');
-            
-        case "get_jobs": 
-            $scope = $req['scope'] ?? 'all';
-            $organization = $req['organization'] ?? null;
-            return doGetJobs($scope, $organization);
-            
-        default:
-            error_log("Unknown request type received: " . $req['type']);
-            return "Invalid request: Unknown type"; 
+    try { // <-- START OF ERROR HANDLING
+        switch ($req['type']) {
+            case "register": 
+                return doRegister($req['username'],$req['password']);
+            case "login": 
+                return doLogin($req['username'],$req['password']);
+            case "validate_session": 
+                return doValidate($req['sessionId']);
+            case "post_job": 
+                return doPostJob(
+                    $req['title'] ?? '',
+                    $req['employer'] ?? '',
+                    $req['location'] ?? '',
+                    $req['qualifications'] ?? '',
+                    $req['external_link'] ?? '' ,
+                    $req['description'] ?? ''
+                );
+            case "search_jobs_local": 
+                return doSearchJobsLocal($req['query'] ?? '');
+            case "get_jobs": 
+                $scope = $req['scope'] ?? 'all';
+                $organization = $req['organization'] ?? null;
+                return doGetJobs($scope, $organization);
+                
+            default:
+                error_log("Unknown request type received: " . $req['type']);
+                return "Invalid request: Unknown type"; 
+        }
+    } catch (PDOException $e) { // <-- CATCH DATABASE ERRORS
+        $error_message = "Database Error in processing " . $req['type'] . ": " . $e->getMessage();
+        error_log($error_message);
+        return $error_message;
+    } catch (Exception $e) { // <-- CATCH ALL OTHER ERRORS
+        $error_message = "General Error in processing " . $req['type'] . ": " . $e->getMessage();
+        error_log($error_message);
+        return $error_message;
     }
 }
 
