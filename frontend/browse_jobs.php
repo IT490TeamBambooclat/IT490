@@ -1,6 +1,4 @@
 <?php
-// Displays job listings from the API and lets logged-in users save jobs.
-
 session_start();
 require_once('api_rabbitmq_client.php');
 
@@ -10,7 +8,9 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-// Ask RabbitMQ for job listings (the backend consumer fetches from DB/API)
+$username = $_SESSION['username'];
+
+// Ask RabbitMQ for job listings
 $request = ['type' => 'get_jobs', 'scope' => 'all'];
 $response = mq_request($request);
 ?>
@@ -33,29 +33,47 @@ body {
     border-radius: 6px;
     box-shadow: 0 1px 3px rgba(0,0,0,.06);
 }
-.save-btn {
+.save-btn, .apply-btn {
     background-color: #004080;
     color: white;
     border: none;
     padding: 6px 10px;
     border-radius: 4px;
     cursor: pointer;
+    margin-right: 8px;
 }
-.save-btn:hover {
+.save-btn:hover, .apply-btn:hover {
     background-color: #0066cc;
+}
+.top-links {
+    margin-bottom: 20px;
+}
+.top-links a {
+    text-decoration: none;
+    background: #004080;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+.top-links a:hover {
+    background: #0066cc;
 }
 </style>
 </head>
 <body>
     <h2>Available Job Openings</h2>
 
+    <div class="top-links">
+        <a href="jobseeker.php">🏠 Dashboard</a>
+        <a href="view_my_jobs.php">💼 My Saved & Applied Jobs</a>
+    </div>
+
 <?php
-// Check if we got any jobs back from the MQ request
 if (!$response || empty($response)) {
     echo "<p>No job postings available at the moment.</p>";
 } else {
     foreach ($response as $job) {
-        // Safely extract data with defaults
         $position_id = htmlspecialchars($job['position_id'] ?? '');
         $title = htmlspecialchars($job['title'] ?? 'Untitled');
         $employer = htmlspecialchars($job['organization'] ?? 'N/A');
@@ -63,14 +81,12 @@ if (!$response || empty($response)) {
         $dateposted = htmlspecialchars($job['date_posted'] ?? 'Unknown');
         $external = htmlspecialchars($job['external_link'] ?? '#');
 
-        // Output job info with Save button
         echo "<div class='job'>";
         echo "<h3>{$title}</h3>";
         echo "<p><strong>Employer:</strong> {$employer} &nbsp; <strong>Location:</strong> {$loc}</p>";
         echo "<p><strong>Posted:</strong> {$dateposted}</p>";
-        echo "<p><a href='{$external}' target='_blank'>More / Apply</a></p>";
+        echo "<p><a href='{$external}' target='_blank' class='apply-link' data-jobid='{$position_id}'>More / Apply</a></p>";
 
-        // Save Job button — sends job info to backend/save_job.php
         echo "<button class='save-btn'
                 data-position-id='{$position_id}'
                 data-title='{$title}'
@@ -84,11 +100,8 @@ if (!$response || empty($response)) {
     }
 }
 ?>
-    <p><a href='jobseeker.php'>Back to Dashboard</a></p>
-
 <script>
-// Sends job data to backend/save_job.php when the "Save Job" button is clicked.
-
+// SAVE job button
 document.querySelectorAll('.save-btn').forEach(button => {
     button.addEventListener('click', () => {
         const formData = new FormData();
@@ -98,8 +111,7 @@ document.querySelectorAll('.save-btn').forEach(button => {
         formData.append('location', button.dataset.location);
         formData.append('date_posted', button.dataset.date);
 
-        // Send data to backend using fetch()
-        fetch('../backend/save_job.php', {
+        fetch('save_job.php', {
             method: 'POST',
             body: formData
         })
@@ -113,8 +125,21 @@ document.querySelectorAll('.save-btn').forEach(button => {
         });
     });
 });
-</script>
 
+// APPLY link tracking
+document.querySelectorAll('.apply-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        const jobID = link.dataset.jobid;
+        if (!jobID) return;
+
+        // Record application
+        fetch('apply_job.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'job_id=' + encodeURIComponent(jobID)
+        }).catch(err => console.error('Apply tracking failed:', err));
+    });
+});
+</script>
 </body>
 </html>
-
