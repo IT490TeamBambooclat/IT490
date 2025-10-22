@@ -7,7 +7,7 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'employer') {
-    header("Location: index.html?error=invalid_role_acccesssssssss");
+    header("Location: index.html?error=invalid_role_access");
     exit;
 }
 $username = htmlspecialchars($_SESSION['username']);
@@ -68,13 +68,14 @@ a.button-link:hover {
 
     <div class="panel">
         <h3>Your Openings</h3>
-        <form action="browse_jobs.php" method="GET">
+      
+        <form action="my_postings.php" method="GET">
             <input type="hidden" name="employer" value="<?php echo $username; ?>">
             <button type="submit">View My Postings</button>
         </form>
     </div>
 
-    <!-- ✅ NEW PANEL TO VIEW APPLICANTS -->
+
     <div class="panel">
         <h3>Applicants for Your Jobs</h3>
         <a href="view_applicants.php" class="button-link">View Applicants</a>
