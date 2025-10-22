@@ -62,14 +62,26 @@ function getPDO() {
     return new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 }
 
-function doRegister($username, $password) {
+function doRegister($username, $password, $role, $email, $alerts_email_enabled) {
     $pdo = getPDO();
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE username=?");
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
     $stmt->execute([$username]);
-    if ($stmt->fetch()) return false;
+    if ($stmt->fetch()) 
+    {
+        return false;
+    }
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    if ($stmt->fetch()) 
+    {
+        return false;
+    }
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("INSERT INTO users (username,password_hash) VALUES (?,?)");
-    return $stmt->execute([$username, $hash]);
+    $stmt = $pdo->prepare(
+        "INSERT INTO users (username, password_hash, role, email, alerts_email_enabled) 
+         VALUES (?, ?, ?, ?, ?)"
+    );   
+    return $stmt->execute([$username, $hash, $role, $email, $alerts_email_enabled]);
 }
 
 function doLogin($username, $password) {
@@ -154,8 +166,8 @@ function requestProcessor($req) {
     
     try { // <-- START OF ERROR HANDLING
 	    switch ($req['type']) {
-            case "register": 
-                return doRegister($req['username'],$req['password']);
+	    case "register":
+                return doRegister($req['username'],$req['password'],$req['role'],$req['email'],$req['alerts_email_enabled']??0);
             case "login": 
                 return doLogin($req['username'],$req['password']);
             case "validate_session": 
