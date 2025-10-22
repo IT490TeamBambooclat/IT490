@@ -10,10 +10,34 @@
             text-align: center;
             padding-top: 80px;
         }
+
+        /* Top nav (clickable company name/logo) */
+        .navbar {
+            background-color: #004080;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+        }
+        .navbar .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar img { height: 30px; }
+        .navbar a { color: white; text-decoration: none; font-weight: bold; }
+        .navbar .menu a { margin-left: 16px; color: white; text-decoration: none; font-weight: bold; }
+
         .container {
             background-color: white;
             width: 400px;
-            margin: auto;
+            margin: 110px auto 20px auto; /* leave room for fixed navbar */
             padding: 25px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -47,9 +71,25 @@
         }
         fieldset { border: 1px solid #ddd; border-radius: 6px; padding: 10px; margin-top: 16px; text-align: left; }
         legend { font-weight: bold; color: #004080; }
+        .role-options { display:flex; gap:12px; margin-top:8px; }
+        .role-options label { display:flex; align-items:center; gap:6px; font-weight: normal; }
+        .small-note { font-size: 13px; color: #666; margin-top:8px; }
     </style>
 </head>
 <body>
+
+<!-- Top navbar -->
+<div class="navbar">
+    <div class="logo">
+        <a href="index.html"><img src="logo.png" alt="JobConnect Logo"></a>
+        <a href="index.html">JobConnect</a>
+    </div>
+    <div class="menu">
+        <a href="index.html">Home</a>
+        <a href="#">About</a>
+        <a href="index.html">Login</a>
+    </div>
+</div>
 
 <div class="container">
     <h1>Register</h1>
@@ -64,6 +104,16 @@
 
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
+
+        <!-- Role selection (single choice) -->
+        <fieldset>
+            <legend>Role</legend>
+            <div class="role-options">
+                <label><input type="radio" name="role" value="jobseeker" checked> Job Seeker</label>
+                <label><input type="radio" name="role" value="employer"> Employer</label>
+            </div>
+            <div class="small-note">Choose the account type that best fits you. You can register only as one role.</div>
+        </fieldset>
 
         <!-- Job Alerts (email only) -->
         <fieldset>
@@ -86,6 +136,13 @@ function sendRegisterRequest() {
     const username = document.getElementById("username").value.trim();
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
+
+    // get role radio
+    const roleNodes = document.getElementsByName("role");
+    let role = 'jobseeker';
+    for (let i=0;i<roleNodes.length;i++){
+        if (roleNodes[i].checked) { role = roleNodes[i].value; break; }
+    }
 
     if (!username || !email || !password) {
         document.getElementById("textResponse").innerHTML = "All fields are required.";
@@ -117,6 +174,7 @@ function sendRegisterRequest() {
         "username=" + encodeURIComponent(username) +
         "&email=" + encodeURIComponent(email) +
         "&password=" + encodeURIComponent(password) +
+        "&role=" + encodeURIComponent(role) +
         "&alerts_email_enabled=" + alertEmailEnabled +
         "&alerts_email=" + encodeURIComponent(alertEmail)
     );
@@ -125,4 +183,3 @@ function sendRegisterRequest() {
 
 </body>
 </html>
-
