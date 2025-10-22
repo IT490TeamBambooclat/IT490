@@ -11,26 +11,47 @@
       padding-top: 80px;
       margin: 0;
     }
-    /* Top Bar */
+
     .navbar {
       background-color: #004080;
       color: white;
-      padding: 12px 20px;
-      text-align: left;
-      position: fixed;
-      top: 0;
-      width: 100%;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      position: fixed;
+      width: 100%;
+      top: 0;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      z-index: 100;
     }
-    .navbar a {
+
+    .navbar .logo {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      text-decoration: none;
+      color: white;
+    }
+
+    .navbar .logo img {
+      height: 40px;
+      margin-right: 10px;
+    }
+
+    .navbar h1 {
+      font-size: 22px;
+      margin: 0;
+    }
+
+    .navbar .menu a {
       color: white;
       text-decoration: none;
+      margin-left: 20px;
       font-weight: bold;
     }
-    .navbar a:hover {
+
+    .navbar .menu a:hover {
       text-decoration: underline;
     }
 
@@ -42,17 +63,20 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+
     label {
       display: block;
       margin-top: 10px;
       text-align: left;
     }
+
     input[type="text"], input[type="password"], input[type="email"] {
       width: 100%;
       padding: 8px;
       margin-top: 5px;
       box-sizing: border-box;
     }
+
     button {
       margin-top: 20px;
       background-color: #004080;
@@ -62,13 +86,16 @@
       border-radius: 4px;
       cursor: pointer;
     }
+
     button:hover {
       background-color: #0066cc;
     }
+
     #textResponse {
       margin-top: 15px;
       color: #333;
     }
+
     fieldset {
       border: 1px solid #ddd;
       border-radius: 6px;
@@ -76,6 +103,7 @@
       margin-top: 16px;
       text-align: left;
     }
+
     legend {
       font-weight: bold;
       color: #004080;
@@ -84,10 +112,12 @@
 </head>
 <body>
 
-  <!-- Top Navigation Bar -->
   <div class="navbar">
-    <a href="index.html">🏢 JobConnect</a>
-    <div>
+    <a href="index.html" class="logo">
+      <img src="logo.png" alt="Company Logo">
+      <h1>JobConnect</h1>
+    </a>
+    <div class="menu">
       <a href="index.html">Home</a>
     </div>
   </div>
@@ -106,14 +136,12 @@
       <label for="password">Password:</label>
       <input type="password" id="password" name="password" required>
 
-      <!-- Role Selection -->
       <fieldset>
         <legend>Select Role</legend>
         <label><input type="radio" name="role" value="job_seeker" required> Job Seeker</label>
         <label><input type="radio" name="role" value="employer" required> Employer</label>
       </fieldset>
 
-      <!-- Job Alerts (uses top email) -->
       <fieldset>
         <legend>Job Alerts (optional)</legend>
         <label>
@@ -134,7 +162,6 @@ function sendRegisterRequest() {
   const password = document.getElementById("password").value.trim();
   const alertEmailEnabled = document.getElementById("alertEmailEnabled").checked ? 1 : 0;
 
-  // Get selected role
   const roleInput = document.querySelector('input[name="role"]:checked');
   const role = roleInput ? roleInput.value : "";
 
@@ -170,5 +197,6 @@ function sendRegisterRequest() {
   );
 }
 </script>
+
 </body>
 </html>
