@@ -1,194 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Register Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #eef2f3;
-            text-align: center;
-            padding-top: 80px;
-        }
-        /* Top bar */
-        .navbar {
-            background-color: #004080;
-            color: white;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 25px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .navbar .logo {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            text-decoration: none;
-            color: white;
-        }
-        .navbar .logo img {
-            height: 35px;
-            margin-right: 10px;
-        }
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            margin-left: 20px;
-            font-weight: bold;
-        }
-        .navbar a:hover {
-            text-decoration: underline;
-        }
+  <meta charset="UTF-8">
+  <title>Register Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f3;
+      text-align: center;
+      padding-top: 80px;
+      margin: 0;
+    }
+    /* Top Bar */
+    .navbar {
+      background-color: #004080;
+      color: white;
+      padding: 12px 20px;
+      text-align: left;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .navbar a:hover {
+      text-decoration: underline;
+    }
 
-        .container {
-            background-color: white;
-            width: 400px;
-            margin: auto;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-top: 80px;
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-            text-align: left;
-        }
-        input[type="text"], input[type="password"], input[type="email"] {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            box-sizing: border-box;
-        }
-        button {
-            margin-top: 20px;
-            background-color: #004080;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0066cc;
-        }
-        #textResponse {
-            margin-top: 15px;
-            color: #333;
-        }
-        fieldset {
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 10px;
-            margin-top: 16px;
-            text-align: left;
-        }
-        legend { font-weight: bold; color: #004080; }
-    </style>
+    .container {
+      background-color: white;
+      width: 400px;
+      margin: 100px auto 50px;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      text-align: left;
+    }
+    input[type="text"], input[type="password"], input[type="email"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      background-color: #004080;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0066cc;
+    }
+    #textResponse {
+      margin-top: 15px;
+      color: #333;
+    }
+    fieldset {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 16px;
+      text-align: left;
+    }
+    legend {
+      font-weight: bold;
+      color: #004080;
+    }
+  </style>
 </head>
 <body>
 
-<!-- Top Bar -->
-<div class="navbar">
-    <a href="index.html" class="logo">
-        <img src="logo.png" alt="Company Logo">
-        <span>JobConnect</span>
-    </a>
+  <!-- Top Navigation Bar -->
+  <div class="navbar">
+    <a href="index.html">🏢 JobConnect</a>
     <div>
-        <a href="index.html">Home</a>
-        <a href="login.html">Login</a>
+      <a href="index.html">Home</a>
     </div>
-</div>
+  </div>
 
-<div class="container">
+  <div class="container">
     <h1>Register</h1>
     <p>Please enter your details below.</p>
 
     <form onsubmit="event.preventDefault(); sendRegisterRequest();">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
 
-        <!-- Role Selection (radio ensures single choice) -->
-        <fieldset>
-            <legend>Select Your Role</legend>
-            <label><input type="radio" name="role" value="job_seeker" required> Job Seeker</label><br>
-            <label><input type="radio" name="role" value="employer"> Employer</label>
-        </fieldset>
+      <!-- Role Selection -->
+      <fieldset>
+        <legend>Select Role</legend>
+        <label><input type="radio" name="role" value="job_seeker" required> Job Seeker</label>
+        <label><input type="radio" name="role" value="employer" required> Employer</label>
+      </fieldset>
 
-        <!-- Job Alerts (uses top email automatically when checked) -->
-        <fieldset>
-            <legend>Job Alerts (optional)</legend>
-            <label>
-                <input type="checkbox" id="alertEmailEnabled">
-                Receive email notifications (we will use the email you entered above)
-            </label>
-        </fieldset>
+      <!-- Job Alerts (uses top email) -->
+      <fieldset>
+        <legend>Job Alerts (optional)</legend>
+        <label>
+          <input type="checkbox" id="alertEmailEnabled"> Receive job alerts by email
+        </label>
+      </fieldset>
 
-        <button type="submit">Register</button>
+      <button type="submit">Register</button>
     </form>
 
     <div id="textResponse">Please enter your details</div>
-</div>
+  </div>
 
 <script>
 function sendRegisterRequest() {
-    const username = document.getElementById("username").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const roleNode = document.querySelector('input[name="role"]:checked');
-    const role = roleNode ? roleNode.value : '';
+  const username = document.getElementById("username").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const alertEmailEnabled = document.getElementById("alertEmailEnabled").checked ? 1 : 0;
 
-    if (!username || !email || !password || !role) {
-        document.getElementById("textResponse").innerHTML = "All fields are required, including role.";
-        return;
+  // Get selected role
+  const roleInput = document.querySelector('input[name="role"]:checked');
+  const role = roleInput ? roleInput.value : "";
+
+  if (!username || !email || !password || !role) {
+    document.getElementById("textResponse").innerHTML = "All fields and a role are required.";
+    return;
+  }
+
+  const request = new XMLHttpRequest();
+  request.open("POST", "register.php", true);
+  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+  request.onreadystatechange = function () {
+    if (this.readyState === 4 && this.status === 200) {
+      const jsonResponse = JSON.parse(this.responseText);
+      const message = jsonResponse.message || "No response from server.";
+      document.getElementById("textResponse").innerHTML = message;
+
+      if (parseInt(jsonResponse.returnCode) === 0) {
+        setTimeout(() => window.location.href = "index.html", 2000);
+      }
+    } else if (this.readyState === 4) {
+      document.getElementById("textResponse").innerHTML = "An error occurred. Please try again.";
     }
+  };
 
-    // alerts checkbox uses the same email field (no second input)
-    const alertEmailEnabled = document.getElementById("alertEmailEnabled").checked ? 1 : 0;
-    const alertEmail = alertEmailEnabled ? email : '';
-
-    const request = new XMLHttpRequest();
-    request.open("POST", "register.php", true);
-    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-    request.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            const jsonResponse = JSON.parse(this.responseText);
-            const message = jsonResponse.message || "No response from server.";
-            document.getElementById("textResponse").innerHTML = message;
-
-            if (parseInt(jsonResponse.returnCode) === 0) {
-                setTimeout(() => window.location.href = "index.html", 2000);
-            }
-        } else if (this.readyState === 4) {
-            document.getElementById("textResponse").innerHTML = "An error occurred. Please try again.";
-        }
-    };
-
-    // send username, email, password, role, and alerts info to register.php
-    const body =
-        "username=" + encodeURIComponent(username) +
-        "&email=" + encodeURIComponent(email) +
-        "&password=" + encodeURIComponent(password) +
-        "&role=" + encodeURIComponent(role) +
-        "&alerts_email_enabled=" + alertEmailEnabled +
-        "&alerts_email=" + encodeURIComponent(alertEmail);
-
-    request.send(body);
+  request.send(
+    "username=" + encodeURIComponent(username) +
+    "&email=" + encodeURIComponent(email) +
+    "&password=" + encodeURIComponent(password) +
+    "&role=" + encodeURIComponent(role) +
+    "&alerts_email_enabled=" + alertEmailEnabled
+  );
 }
 </script>
-
 </body>
 </html>
