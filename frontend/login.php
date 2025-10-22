@@ -42,12 +42,31 @@ error_log("RabbitMQ login response: " . json_encode($response));
 // Handle RabbitMQ response
 if ($response !== false && is_string($response) && !empty($response)) {
     // Successful login: $response contains the Session ID
-   // Successful login: $response contains the Session ID
     $_SESSION['username'] = $username;
     $_SESSION['session_id'] = $response; // Store the session ID from the server
 
-    // Redirect to role selection (let user pick Job Seeker or Employer)
-    header("Location: role_select.php");
+    // --- NEW: fetch user's role from backend via RabbitMQ ---
+    $roleRequest = [
+        'type' => 'get_user_role',
+        'username' => $username
+    ];
+    $roleResp = $client->send_request($roleRequest);
+
+    // roleResp expected to be a string like 'jobseeker' or 'employer'
+    $role = 'jobseeker';
+    if (is_string($roleResp) && ($roleResp === 'jobseeker' || $roleResp === 'employer')) {
+        $role = $roleResp;
+    } elseif (is_array($roleResp) && isset($roleResp['role'])) {
+        $role = $roleResp['role'];
+    }
+    $_SESSION['role'] = $role;
+
+    // Redirect to appropriate dashboard
+    if ($role === 'employer') {
+        header("Location: employer.php");
+    } else {
+        header("Location: jobseeker.php");
+    }
     exit;
 } else {
     // Login failed
