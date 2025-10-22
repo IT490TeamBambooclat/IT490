@@ -3,6 +3,16 @@
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
+
+function doGetEmployerJobs($organization_username) {
+    $pdo = getPDO();
+
+    // Select all jobs (and additional info) from jobsdata where the organization is equals the employer's username.
+    $sql = "SELECT job_title AS title,location,qualification_summary AS qualifications,major_duties AS description,apply_uri AS external_link FROM jobs_data WHERE organization = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$organization_username]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 function doGetSavedJobs($username) {
     $pdo = getPDO();
     
@@ -202,6 +212,10 @@ function requestProcessor($req) {
 		);
 	    case "get_saved_jobs":
 		    return doGetSavedJobs($req['username'] ?? '');
+	    case "get_employer_jobs":
+		   $jobs=doGetEmployerJobs($req['username'??'']);
+		   return ['jobs'=>$jobs];
+
 	    		      
             default:
                 error_log("Unknown request type received: " . $req['type']);

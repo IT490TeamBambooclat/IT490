@@ -18,7 +18,7 @@ $request = [
     'username' => $username
 ];
 
-$response = send_request_to_backend($request);
+$response = mq_request($request);
 $jobs = $response['jobs'] ?? [];
 ?>
 <!DOCTYPE html>
