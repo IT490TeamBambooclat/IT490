@@ -15,6 +15,12 @@ $username = trim($_POST['username'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $password = trim($_POST['password'] ?? '');
 
+// New: role from form
+$role = trim($_POST['role'] ?? 'jobseeker');
+if ($role !== 'jobseeker' && $role !== 'employer') {
+    $role = 'jobseeker';
+}
+
 // ADDED: email alert fields (email only)
 $alerts_email_enabled = isset($_POST['alerts_email_enabled']) ? 1 : 0;
 $alerts_email = trim($_POST['alerts_email'] ?? '');
@@ -29,10 +35,12 @@ if (empty($username) || empty($email) || empty($password)) {
 $client = new rabbitMQClient("testRabbitMQ.ini", "testServer");
 
 // Prepare request: Change 'type' to 'register' and use 'password' key
+// Include 'role' here so the backend stores it
 $request = [
     'type' => 'register',
     'username' => $username,
-    'password' => $password
+    'password' => $password,
+    'role' => $role
 ];
 
 // Send and receive response
@@ -64,6 +72,7 @@ if ($response === true || (is_array($response) && isset($response['returnCode'])
     $prefs[$username] = [
         'email_enabled' => $alerts_email_enabled,
         'email'         => $alerts_email,
+        'role'          => $role,
         'updated_at'    => date('c')
     ];
 
@@ -75,4 +84,3 @@ if ($response === true || (is_array($response) && isset($response['returnCode'])
     echo json_encode(['returnCode' => 1, 'message' => $message]);
 }
 ?>
-
