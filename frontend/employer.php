@@ -7,7 +7,7 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'employer') {
-    header("Location: role_select.php");
+    header("Location: index.html?error=invalid_role_acccesssssssss");
     exit;
 }
 $username = htmlspecialchars($_SESSION['username']);

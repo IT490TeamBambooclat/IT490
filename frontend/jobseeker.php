@@ -6,13 +6,10 @@ if (!isset($_SESSION['username'])) {
     header("Location: index.html");
     exit;
 }
-if (!isset($_SESSION['role'])) {
-    header("Location: role_select.php");
-    exit;
-}
-if ($_SESSION['role'] !== 'jobseeker') {
-    header("Location: role_select.php");
-    exit;
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'job_seeker')
+{
+	header("Location: index.html?error=invalid_role_access");
+	exit;
 }
 $username = htmlspecialchars($_SESSION['username']);
 ?>

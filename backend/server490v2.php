@@ -83,18 +83,26 @@ function doRegister($username, $password, $role, $email, $alerts_email_enabled) 
     );   
     return $stmt->execute([$username, $hash, $role, $email, $alerts_email_enabled]);
 }
-
 function doLogin($username, $password) {
     $pdo = getPDO();
-    $stmt = $pdo->prepare("SELECT password_hash FROM users WHERE username=?");
+    $stmt = $pdo->prepare("SELECT password_hash, role FROM users WHERE username=?");
     $stmt->execute([$username]);
-    $row = $stmt->fetch();
-    if (!$row || !password_verify($password, $row['password_hash'])) return false;
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$row || !password_verify($password, $row['password_hash'])) {
+        return false;
+    }
+
     $sid = bin2hex(random_bytes(16));
     $exp = date("Y-m-d H:i:s", strtotime("+1 day"));
+    
     $stmt = $pdo->prepare("INSERT INTO sessions (session_id,username,expires_at) VALUES (?,?,?)");
     $stmt->execute([$sid,$username,$exp]);
-    return $sid;
+    
+    return [
+        'session_id' => $sid,
+        'role' => $row['role']
+    ];
 }
 
 function doValidate($sid) {
@@ -193,8 +201,8 @@ function requestProcessor($req) {
                     $req['position_id'] ?? ''
 		);
 	    case "get_saved_jobs":
-                return doGetSavedJobs($req['username'] ?? '');
-                
+		    return doGetSavedJobs($req['username'] ?? '');
+	    		      
             default:
                 error_log("Unknown request type received: " . $req['type']);
                 return "Invalid request: Unknown type"; 
