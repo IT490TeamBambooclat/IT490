@@ -10,37 +10,50 @@
             text-align: center;
             padding-top: 80px;
         }
-
-        /* Top nav (clickable company name/logo) */
+        /* Top bar */
         .navbar {
             background-color: #004080;
             color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            z-index: 999;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .navbar .logo {
             display: flex;
             align-items: center;
-            gap: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
         }
-        .navbar img { height: 30px; }
-        .navbar a { color: white; text-decoration: none; font-weight: bold; }
-        .navbar .menu a { margin-left: 16px; color: white; text-decoration: none; font-weight: bold; }
+        .navbar .logo img {
+            height: 35px;
+            margin-right: 10px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
 
         .container {
             background-color: white;
             width: 400px;
-            margin: 110px auto 20px auto; /* leave room for fixed navbar */
+            margin: auto;
             padding: 25px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 80px;
         }
         label {
             display: block;
@@ -69,25 +82,27 @@
             margin-top: 15px;
             color: #333;
         }
-        fieldset { border: 1px solid #ddd; border-radius: 6px; padding: 10px; margin-top: 16px; text-align: left; }
+        fieldset {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 16px;
+            text-align: left;
+        }
         legend { font-weight: bold; color: #004080; }
-        .role-options { display:flex; gap:12px; margin-top:8px; }
-        .role-options label { display:flex; align-items:center; gap:6px; font-weight: normal; }
-        .small-note { font-size: 13px; color: #666; margin-top:8px; }
     </style>
 </head>
 <body>
 
-<!-- Top navbar -->
+<!-- Top Bar -->
 <div class="navbar">
-    <div class="logo">
-        <a href="index.html"><img src="logo.png" alt="JobConnect Logo"></a>
-        <a href="index.html">JobConnect</a>
-    </div>
-    <div class="menu">
+    <a href="index.html" class="logo">
+        <img src="logo.png" alt="Company Logo">
+        <span>JobConnect</span>
+    </a>
+    <div>
         <a href="index.html">Home</a>
-        <a href="#">About</a>
-        <a href="index.html">Login</a>
+        <a href="login.html">Login</a>
     </div>
 </div>
 
@@ -105,24 +120,20 @@
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
 
-        <!-- Role selection (single choice) -->
+        <!-- Role Selection (radio ensures single choice) -->
         <fieldset>
-            <legend>Role</legend>
-            <div class="role-options">
-                <label><input type="radio" name="role" value="jobseeker" checked> Job Seeker</label>
-                <label><input type="radio" name="role" value="employer"> Employer</label>
-            </div>
-            <div class="small-note">Choose the account type that best fits you. You can register only as one role.</div>
+            <legend>Select Your Role</legend>
+            <label><input type="radio" name="role" value="job_seeker" required> Job Seeker</label><br>
+            <label><input type="radio" name="role" value="employer"> Employer</label>
         </fieldset>
 
-        <!-- Job Alerts (email only) -->
+        <!-- Job Alerts (uses top email automatically when checked) -->
         <fieldset>
             <legend>Job Alerts (optional)</legend>
             <label>
                 <input type="checkbox" id="alertEmailEnabled">
-                Email notifications
+                Receive email notifications (we will use the email you entered above)
             </label>
-            <input type="email" id="alertEmail" placeholder="you@example.com">
         </fieldset>
 
         <button type="submit">Register</button>
@@ -136,21 +147,17 @@ function sendRegisterRequest() {
     const username = document.getElementById("username").value.trim();
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
+    const roleNode = document.querySelector('input[name="role"]:checked');
+    const role = roleNode ? roleNode.value : '';
 
-    // get role radio
-    const roleNodes = document.getElementsByName("role");
-    let role = 'jobseeker';
-    for (let i=0;i<roleNodes.length;i++){
-        if (roleNodes[i].checked) { role = roleNodes[i].value; break; }
-    }
-
-    if (!username || !email || !password) {
-        document.getElementById("textResponse").innerHTML = "All fields are required.";
+    if (!username || !email || !password || !role) {
+        document.getElementById("textResponse").innerHTML = "All fields are required, including role.";
         return;
     }
 
+    // alerts checkbox uses the same email field (no second input)
     const alertEmailEnabled = document.getElementById("alertEmailEnabled").checked ? 1 : 0;
-    const alertEmail = document.getElementById("alertEmail").value.trim();
+    const alertEmail = alertEmailEnabled ? email : '';
 
     const request = new XMLHttpRequest();
     request.open("POST", "register.php", true);
@@ -170,14 +177,16 @@ function sendRegisterRequest() {
         }
     };
 
-    request.send(
+    // send username, email, password, role, and alerts info to register.php
+    const body =
         "username=" + encodeURIComponent(username) +
         "&email=" + encodeURIComponent(email) +
         "&password=" + encodeURIComponent(password) +
         "&role=" + encodeURIComponent(role) +
         "&alerts_email_enabled=" + alertEmailEnabled +
-        "&alerts_email=" + encodeURIComponent(alertEmail)
-    );
+        "&alerts_email=" + encodeURIComponent(alertEmail);
+
+    request.send(body);
 }
 </script>
 
