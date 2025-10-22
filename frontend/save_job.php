@@ -3,21 +3,19 @@ session_start();
 require_once('api_rabbitmq_client.php');
 
 header('Content-Type: application/json');
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['username'], $_POST['position_id'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Invalid request data.']);
+if (!isset($_SESSION['username'])) //check if logged-in
+{
+    echo json_encode(['status' => 'error', 'message' => 'User is not logged in.']);
     exit;
 }
-
-// Security: Ensure the username from POST matches the active session
-if (!isset($_SESSION['username']) || $_SESSION['username'] !== $_POST['username']) {
-    echo json_encode(['status' => 'error', 'message' => 'Authentication error or session mismatch.']);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['position_id'])) {
+    echo json_encode(['status' => 'error', 'message' => 'Invalid request data or missing position ID.']);
     exit;
 }
 
 $request = [
     'type' => 'save_job',
-    'username' => $_POST['username'],
+    'username' => $_SESSION['username'],
     'position_id' => $_POST['position_id']
 ];
 
