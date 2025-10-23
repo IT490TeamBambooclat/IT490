@@ -2,7 +2,6 @@
 session_start();
 require_once('api_rabbitmq_client.php');
 
-// Ensure the user is logged in
 if (!isset($_SESSION['username'])) {
     header("Location: index.html");
     exit;
@@ -10,12 +9,9 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username'];
 
-// Ask RabbitMQ for the user's saved job listings
-// This relies on the 'get_saved_jobs' case being implemented in the backend server.
 $request = ['type' => 'get_saved_jobs', 'username' => $username];
 $response = mq_request($request);
 
-// Ensure $response is an array even if empty or failed
 if (!is_array($response)) {
     $response = [];
 }
@@ -38,7 +34,7 @@ body {
     margin-bottom: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,.1);
-    border-left: 5px solid #004080; /* Highlight for saved job */
+    border-left: 5px solid #004080;
 }
 .job h3 {
     color: #004080;
@@ -104,8 +100,7 @@ if (empty($response)) {
         $loc = htmlspecialchars($job['location'] ?? 'N/A');
         $dateposted = htmlspecialchars($job['date_posted'] ?? 'Unknown');
         $date_saved = htmlspecialchars($job['date_saved'] ?? 'N/A');
-        // 'external_link' is the 'apply_uri' column joined from jobs_data
-        $external = htmlspecialchars($job['external_link'] ?? '#'); 
+        $external = htmlspecialchars($job['external_link'] ?? '#');
         $position_id = htmlspecialchars($job['position_id'] ?? '');
 
         echo "<div class='job'>";
@@ -116,17 +111,23 @@ if (empty($response)) {
         echo "<p><strong>Posted:</strong> {$dateposted}</p>";
         echo "<p><strong>Saved On:</strong> {$date_saved}</p>";
         echo "</div>";
-        
-        // Use apply_uri from jobs_data as the primary link
-        echo "<a href='{$external}' target='_blank' class='apply-btn'>View & Apply Externally</a>";
-        
-        // Optional: Add a button to remove the saved job (requires another backend function)
-        // echo "<button class='remove-btn' data-position-id='{$position_id}' data-username='{$username}'>Remove</button>";
-        
+        echo "<a href='{$external}' target='_blank' class='apply-btn apply-link' data-jobid='{$position_id}'>View & Apply Externally</a>";
         echo "</div>";
     }
 }
 ?>
-<!-- No JavaScript needed for this basic display view -->
+<script>
+document.querySelectorAll('.apply-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        const jobID = link.dataset.jobid;
+        if (!jobID) return;
+        fetch('apply_job.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'job_id=' + encodeURIComponent(jobID)
+        }).catch(err => console.error('Apply tracking failed:', err));
+    });
+});
+</script>
 </body>
 </html>
