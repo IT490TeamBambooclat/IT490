@@ -18,7 +18,7 @@ if ($title === '' || $major_duties === '') {
     header("Location: employer.php?error=required");
     exit;
 }
-
+$position_id='LOCAL-'.uniqid();
 // Build payload
 $request = [
     'type' => 'post_job',
@@ -28,7 +28,8 @@ $request = [
     'qualifications' => $qualifications,
     'external_link' => $external_link,
     'description' => $major_duties,
-    'posted_at' => date(DATE_ATOM)
+    'posted_at' => date(DATE_ATOM),
+    'position_id'=>$position_id
 ];
 
 $response = mq_request($request);

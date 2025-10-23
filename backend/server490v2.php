@@ -171,12 +171,12 @@ function doApplyJob($username, $position_id) {
         return ['status' => 'error', 'message' => 'Database insert failed.'];
     }
 }
-function doPostJob($title, $organization, $location,$qualifications,$external_link,$description) {
+function doPostJob($title, $organization, $location,$qualifications,$external_link,$description,$position_id) {
     $pdo = getPDO();
     $stmt = $pdo->prepare("INSERT INTO jobs_data 
-                            (job_title, organization, location, date_posted, qualification_summary, apply_uri, major_duties) 
-                            VALUES (?, ?, ?, CURDATE(), ?, ?, ?)");
-    return $stmt->execute([$title, $organization, $location, $qualifications, $external_link, $description]); 
+                            (job_title, organization, location, date_posted, qualification_summary, apply_uri, major_duties,position_id) 
+                            VALUES (?, ?, ?, CURDATE(), ?, ?, ?,?)");
+    return $stmt->execute([$title, $organization, $location, $qualifications, $external_link, $description,$position_id]); 
 }
 
 
@@ -218,6 +218,27 @@ function doSearchJobsLocal($query) {
     // Package results in the expected format
     return ['results' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
 }
+function getApplicants($username) {
+    $pdo = getPDO();
+    
+    // Select application details (from applied_jobs) and job title (from jobs_data)
+    $sql = "
+        SELECT
+            aj.username AS applicant_username,
+            aj.position_id AS job_id,
+            aj.email,
+            aj.date_applied AS applied_at,
+            jd.job_title
+        FROM applied_jobs aj
+        JOIN jobs_data jd ON aj.position_id = jd.position_id
+        WHERE jd.organization = ?
+        ORDER BY jd.job_title, aj.date_applied DESC
+    ";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$username]);
+    return ['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)];//frontend is waiting for 'data' values.
+}
 
 function requestProcessor($req) {
     if (!isset($req['type'])) {
@@ -242,7 +263,8 @@ function requestProcessor($req) {
                     $req['location'] ?? '',
                     $req['qualifications'] ?? '',
                     $req['external_link'] ?? '' ,
-                    $req['description'] ?? ''
+		    $req['description'] ?? '',
+		    $req['position_id']??''
                 );
             case "search_jobs_local": 
                 return doSearchJobsLocal($req['query'] ?? '');
@@ -266,6 +288,8 @@ function requestProcessor($req) {
 		    return doApplyJob($req['username']??'',$req['position_id']??'');
 	    case "get_user_email":
 		    return doGetUserEmail($req['username']??'');
+	    case "get_applicants":
+		    return getApplicants($req['username']??'');
 	    
 	    default:
                 error_log("Unknown request type received: " . $req['type']);

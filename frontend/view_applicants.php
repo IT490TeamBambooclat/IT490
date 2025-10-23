@@ -13,7 +13,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'employer') {
 
 $username = $_SESSION['username'];
 
-$request = ['type'=>'get_applicants_by_employer','employer'=>$username];
+$request = ['type'=>'get_applicants','username'=>$username];
 $response = mq_request($request);
 $applicants = [];
 if (is_array($response) && isset($response['data'])) $applicants = $response['data'];

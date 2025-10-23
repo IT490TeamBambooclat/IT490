@@ -60,7 +60,7 @@ body {
     line-height: 1.4;
     color: #555;
 }
-.save-btn, .apply-btn {
+.save-btn, .apply-btn, .visit-btn {
     background-color: #004080;
     color: white;
     border: none;
@@ -72,9 +72,19 @@ body {
     display: inline-block;
     transition: background 0.2s;
 }
-.save-btn:hover, .apply-btn:hover {
+
+.apply-btn {
+    background-color: #28a745;
+}
+
+.save-btn:hover, .visit-btn:hover {
     background-color: #0066cc;
 }
+
+.apply-btn:hover {
+    background-color: #218838;
+}
+
 .top-links {
     margin-bottom: 20px;
 }
@@ -125,8 +135,11 @@ if (!$response || empty($response) || is_string($response)) {
         echo "<h4>Major Duties</h4>";
         echo "<p>" . nl2br(substr($major_duties, 0, 400)) . (strlen($major_duties) > 400 ? "..." : "") . "</p>";
         echo "</div>";
-        echo "<p><a href='{$external}' target='_blank' class='apply-btn apply-link' data-jobid='{$position_id}'>More / Apply Now</a></p>";
+        
+        echo "<button class='apply-btn track-apply-btn' data-jobid='{$position_id}' data-uri='{$external}'>Mark as Applied</button>";
+        echo "<a href='{$external}' target='_blank' class='visit-btn'>Visit Website</a>";
         echo "<button class='save-btn' data-position-id='{$position_id}' data-username='{$username}'>Save Job</button>";
+        
         echo "</div>";
     }
 }
@@ -152,15 +165,31 @@ document.querySelectorAll('.save-btn').forEach(button => {
     });
 });
 
-document.querySelectorAll('.apply-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-        const jobID = link.dataset.jobid;
+document.querySelectorAll('.track-apply-btn').forEach(button => {
+    button.addEventListener('click', (e) => {
+        const jobID = button.dataset.jobid;
+
         if (!jobID) return;
+
         fetch('apply_job.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: 'job_id=' + encodeURIComponent(jobID)
-        }).catch(err => console.error('Apply tracking failed:', err));
+        })
+        .then(res => {
+            if (res.ok) {
+                alert('Job marked as Applied! You can visit the website using the "Visit Website" button if you haven\'t already.');
+                button.disabled = true;
+                button.textContent = 'Applied (Tracked)';
+            } else {
+                console.error('Apply tracking failed with status:', res.status);
+                alert('Tracking failed, but you can try again or apply directly using the "Visit Website" button.');
+            }
+        })
+        .catch(err => {
+            console.error('Apply tracking failed:', err);
+            alert('A network error occurred while tracking the application.');
+        });
     });
 });
 </script>
