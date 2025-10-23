@@ -6,8 +6,6 @@ require_once('rabbitMQLib.inc');
 
 function doGetEmployerJobs($organization_username) {
     $pdo = getPDO();
-
-    // Select all jobs (and additional info) from jobsdata where the organization is equals the employer's username.
     $sql = "SELECT job_title AS title,location,qualification_summary AS qualifications,major_duties AS description,apply_uri AS external_link FROM jobs_data WHERE organization = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$organization_username]);
@@ -72,7 +70,7 @@ function getPDO() {
     return new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 }
 
-function doRegister($username, $password, $role, $email, $alerts_email_enabled) {
+function doRegister($username, $password, $role, $email, $alertEmailEnabled) {
     $pdo = getPDO();
     $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
     $stmt->execute([$username]);
@@ -91,7 +89,7 @@ function doRegister($username, $password, $role, $email, $alerts_email_enabled) 
         "INSERT INTO users (username, password_hash, role, email, alerts_email_enabled) 
          VALUES (?, ?, ?, ?, ?)"
     );   
-    return $stmt->execute([$username, $hash, $role, $email, $alerts_email_enabled]);
+    return $stmt->execute([$username, $hash, $role, $email, $alertEmailEnabled]);
 }
 function doLogin($username, $password) {
     $pdo = getPDO();
@@ -124,8 +122,55 @@ function doValidate($sid) {
     if (strtotime($row['expires_at']) < time()) return false;
     return true;
 }
+function doGetUserEmail($username) {
+    $pdo = getPDO();
+    $stmt = $pdo->prepare("SELECT email FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// CORRECTED FUNCTION: Only uses the columns available in jobs_data table
+    if ($row) {
+        return ['email' => $row['email']];
+    } else {
+        return ['email' => ''];
+    }
+}
+function doCheckExistingApplication($username, $position_id) {
+    $pdo = getPDO();
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM applied_jobs WHERE username = ? AND position_id = ?");
+    $stmt->execute([$username, $position_id]);
+    $exists = $stmt->fetchColumn() > 0;
+    return ['exists' => $exists];
+}
+function doApplyJob($username, $position_id) {
+    $pdo = getPDO();
+    
+    $stmt = $pdo->prepare("SELECT email FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user_email = $row['email'] ?? '';
+    
+    if (empty($user_email)) {
+         return ['status' => 'error', 'message' => 'User email not found.'];
+    }
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM applied_jobs WHERE username = ? AND position_id = ?");
+    $stmt->execute([$username, $position_id]);
+    if ($stmt->fetchColumn() > 0) {
+        return ['status' => 'error', 'message' => 'You have already applied to this job.'];
+    }
+    
+    $stmt = $pdo->prepare("INSERT INTO applied_jobs 
+                            (username, position_id, email, date_applied) 
+                            VALUES (?, ?, ?, NOW())");
+                            
+    $success = $stmt->execute([$username, $position_id, $user_email]);
+
+    if ($success) {
+        return ['status' => 'success', 'message' => 'Application recorded successfully.'];
+    } else {
+        return ['status' => 'error', 'message' => 'Database insert failed.'];
+    }
+}
 function doPostJob($title, $organization, $location,$qualifications,$external_link,$description) {
     $pdo = getPDO();
     $stmt = $pdo->prepare("INSERT INTO jobs_data 
@@ -215,9 +260,14 @@ function requestProcessor($req) {
 	    case "get_employer_jobs":
 		   $jobs=doGetEmployerJobs($req['username'??'']);
 		   return ['jobs'=>$jobs];
-
-	    		      
-            default:
+	    case "check_existing_application":
+		    return doCheckExistingApplication($req['username']??'',$req['position_id']??'');
+	    case "apply_job":
+		    return doApplyJob($req['username']??'',$req['position_id']??'');
+	    case "get_user_email":
+		    return doGetUserEmail($req['username']??'');
+	    
+	    default:
                 error_log("Unknown request type received: " . $req['type']);
                 return "Invalid request: Unknown type"; 
         }
