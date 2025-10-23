@@ -13,7 +13,6 @@ if ($q === '') {
     exit;
 }
 
-// prepare request for MQ consumer that will call USAJOBS API
 $request = [
     'type' => 'search_jobs_local',
     'query' => $q,
@@ -22,9 +21,6 @@ $request = [
 ];
 
 $response = mq_request($request);
-
-// We expect $response to be an associative array with 'results' and possibly pagination.
-// If you prefer to display results here, render them.
 ?>
 <!DOCTYPE html>
 <html>
@@ -45,7 +41,7 @@ if (!$response || !is_array($response) || empty($response['results'])) {
     echo "<p>No results found or an error occurred.</p>";
 } else {
     foreach ($response['results'] as $job) {
-        // job fields depend on your MQ consumer mapping from USAJOBS
+        $position_id = htmlspecialchars($job['position_id'] ?? '');
         $title = htmlspecialchars($job['title'] ?? 'Untitled');
         $org = htmlspecialchars($job['organization'] ?? '');
         $location = htmlspecialchars($job['location'] ?? '');
@@ -56,11 +52,25 @@ if (!$response || !is_array($response) || empty($response['results'])) {
         echo "<h3>{$title}</h3>";
         echo "<p><strong>Organization:</strong> {$org} &nbsp; <strong>Location:</strong> {$location}</p>";
         echo "<p>{$summary}</p>";
-        echo "<p><a class='apply' href='{$link}' target='_blank'>View / Apply</a></p>";
+        echo "<p><a class='apply' href='{$link}' target='_blank' data-jobid='{$position_id}'>View / Apply</a></p>";
         echo "</div>";
     }
 }
 ?>
     <p><a href="jobseeker.php">Back to Dashboard</a></p>
+
+<script>
+document.querySelectorAll('a.apply').forEach(link => {
+    link.addEventListener('click', (e) => {
+        const jobID = link.dataset.jobid;
+        if (!jobID) return;
+        fetch('apply_job.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'job_id=' + encodeURIComponent(jobID)
+        }).catch(err => console.error('Apply tracking failed:', err));
+    });
+});
+</script>
 </body>
 </html>
