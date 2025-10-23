@@ -25,7 +25,7 @@ $request = [
     'password' => $password,
     'email' => $email,
     'role' => $role,
-    'alerts_enabled' => $alerts_enabled // This now correctly sends 0 or 1
+    'alerts_email_enabled' => $alerts_enabled // This now correctly sends 0 or 1
 ];
 
 $response = $client->send_request($request);
