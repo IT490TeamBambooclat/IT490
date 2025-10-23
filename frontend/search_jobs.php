@@ -7,6 +7,8 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
+$username = $_SESSION['username'];
+
 $q = trim($_GET['q'] ?? '');
 if ($q === '') {
     header("Location: jobseeker.php?search_error=empty");
@@ -25,16 +27,72 @@ $response = mq_request($request);
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Search Results for "<?php echo htmlspecialchars($q); ?>"</title>
-    <style>
-        body{font-family:Arial, sans-serif;background:#f7f9fb;margin:0;padding:20px}
-        .job{background:#fff;padding:12px;margin-bottom:10px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-        a.apply{background:#004080;color:#fff;padding:8px 10px;border-radius:6px;text-decoration:none}
-    </style>
+<meta charset="utf-8">
+<title>Search Results for "<?php echo htmlspecialchars($q); ?>"</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f7f9fb;
+    margin: 0;
+    padding: 20px;
+}
+.job {
+    background: #fff;
+    padding: 18px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,.1);
+}
+.job h3 {
+    margin-top: 0;
+    color: #004080;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+.job-details p {
+    font-size: 0.9em;
+    color: #555;
+    line-height: 1.4;
+}
+.save-btn, .apply-btn {
+    background-color: #004080;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 8px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.2s;
+}
+.save-btn:hover, .apply-btn:hover {
+    background-color: #0066cc;
+}
+.top-links {
+    margin-bottom: 20px;
+}
+.top-links a {
+    text-decoration: none;
+    background: #004080;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+    margin-right: 10px;
+    transition: background 0.2s;
+}
+.top-links a:hover {
+    background: #0066cc;
+}
+</style>
 </head>
 <body>
     <h2>Search results for "<?php echo htmlspecialchars($q); ?>"</h2>
+
+    <div class="top-links">
+        <a href="jobseeker.php">🏠 Dashboard</a>
+        <a href="view_my_jobs.php">💼 My Saved & Applied Jobs</a>
+    </div>
 
 <?php
 if (!$response || !is_array($response) || empty($response['results'])) {
@@ -52,16 +110,16 @@ if (!$response || !is_array($response) || empty($response['results'])) {
         echo "<h3>{$title}</h3>";
         echo "<p><strong>Organization:</strong> {$org} &nbsp; <strong>Location:</strong> {$location}</p>";
         echo "<p>{$summary}</p>";
-        echo "<p><a class='apply' href='{$link}' target='_blank' data-jobid='{$position_id}'>View / Apply</a></p>";
+
+        echo "<p><a class='apply-btn apply-link' href='{$link}' target='_blank' data-jobid='{$position_id}'>More / Apply Now</a></p>";
+        echo "<button class='save-btn' data-position-id='{$position_id}' data-username='{$username}'>Save Job</button>";
         echo "</div>";
     }
 }
 ?>
-    <p><a href="jobseeker.php">Back to Dashboard</a></p>
-
 <script>
-document.querySelectorAll('a.apply').forEach(link => {
-    link.addEventListener('click', (e) => {
+document.querySelectorAll('.apply-link').forEach(link => {
+    link.addEventListener('click', () => {
         const jobID = link.dataset.jobid;
         if (!jobID) return;
         fetch('apply_job.php', {
@@ -69,6 +127,26 @@ document.querySelectorAll('a.apply').forEach(link => {
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: 'job_id=' + encodeURIComponent(jobID)
         }).catch(err => console.error('Apply tracking failed:', err));
+    });
+});
+
+document.querySelectorAll('.save-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const formData = new FormData();
+        formData.append('username', button.dataset.username);
+        formData.append('position_id', button.dataset.positionId);
+        fetch('save_job.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error saving job.');
+        });
     });
 });
 </script>
