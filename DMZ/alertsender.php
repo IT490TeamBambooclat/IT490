@@ -1,10 +1,11 @@
 #!/usr/bin/php
 <?php
+// Configuration for RabbitMQ Client
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-
+// Require PHPMailer files
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -12,15 +13,14 @@ require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
 
-
-$JOB_QUEUE_SERVER = "DmzInfo";
+$JOB_QUEUE_SERVER = "DmzInfo"; // Target listener on DB VM
 
 function sendJobAlerts() {
     global $JOB_QUEUE_SERVER;
 
     error_log("Starting job alert sender...");
 
-    
+   
     $client = new rabbitMQClient("testRabbitMQ.ini", $JOB_QUEUE_SERVER);
     
     $request = [
@@ -28,7 +28,7 @@ function sendJobAlerts() {
         'message' => 'Requesting list of users enabled for job alerts'
     ];
     
-    
+    // Send request to the Database VM listener
     $response = $client->send_request($request); 
     
     error_log("Received response from DB Listener: " . json_encode($response));
@@ -42,29 +42,32 @@ function sendJobAlerts() {
     $num_emails = count($emails);
     error_log("Retrieved $num_emails emails. Starting mail process...");
 
-    
+   
     if ($num_emails > 0) {
         $mail = new PHPMailer(true);
         try {
-            // Server settings
+           
             $mail->isSMTP();                                            
-            $mail->Host       = 'smtp.gmail.com';                     
+            $mail->Host       = 'smtp.gmail.com';              
             $mail->SMTPAuth   = true;                                   
-            $mail->Username   = 'teambamboclaat@gmail.com'';                   
-            $mail->Password   = 'hhqloyrcdjgrktdx';                              
+            $mail->Username   = 'teambamboclaat@gmail.com';                   
+            $mail->Password   = 'hhqloyrcdjgrktdx';                   
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         
             $mail->Port       = 587;                                    
 
-            
-            $mail->setFrom('teambamboclaat@gmail.com', 'Job Alerts');
+            // Sender 
+            $mail->setFrom('teambamboclaat@gmail.com', 'Job Alerts Service');
 
-            
+     -
+
+            // Content
             $mail->isHTML(true);                                  
-            $mail->Subject = 'Your Daily Job Alert!';
+            $mail->Subject = 'Your Daily Personalized Job Alert!';
             $mail->Body    = '<b>Hello User,</b><p>Here are your personalized job recommendations...</p>';
             $mail->AltBody = 'Hello User, Here are your personalized job recommendations...';
 
             $success_count = 0;
+            // Loop through all retrieved emails and send the alert
             foreach ($emails as $email) {
                 try {
                     // Clear previous recipient and add current one
@@ -86,7 +89,7 @@ function sendJobAlerts() {
             return true;
 
         } catch (Exception $e) {
-            error_log("PHPMailer setup error: " . $e->getMessage());
+            error_log("PHPMailer setup or fatal error: " . $e->getMessage());
             return false;
         }
     } else {
