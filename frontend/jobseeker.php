@@ -12,6 +12,14 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'job_seeker')
 	exit;
 }
 $username = htmlspecialchars($_SESSION['username']);
+
+$resume_request = ['type' => 'get_resume_path', 'username' => $username];
+$resume_response = mq_request($resume_request);
+
+$resume_file_path = '';
+if (is_array($resume_response) && !empty($resume_response['file_path'])) {
+    $resume_file_path = htmlspecialchars($resume_response['file_path']);
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -27,6 +35,20 @@ $username = htmlspecialchars($_SESSION['username']);
         button{background:#004080;color:#fff;padding:10px 14px;border:none;border-radius:6px;cursor:pointer}
         .two-col{display:flex;gap:16px}
         .col{flex:1}
+        .view-btn {
+            background: #28a745;
+            color: #fff;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .view-btn:hover {
+            background: #218838;
+        }
     </style>
 </head>
 <body>
@@ -64,6 +86,13 @@ $username = htmlspecialchars($_SESSION['username']);
                 <button type="submit">Upload Resume</button>
             </div>
         </form>
+        
+        <?php if (!empty($resume_file_path)): ?>
+            <a href="get_resume.php?file=<?php echo $resume_file_path; ?>" target="_blank" class="view-btn">
+                View Resume
+            </a>
+            <p style="font-size: 0.8em; color: green; margin-top: 5px;">Resume successfully uploaded.</p>
+        <?php endif; ?>
     </div>
 
 </div>

@@ -33,6 +33,17 @@ body{font-family:Arial, sans-serif;background:#f6f8fb;margin:0;padding:20px}
 .no-data{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
 a.button-link{display:inline-block;background:#004080;color:white;padding:8px 12px;border-radius:6px;text-decoration:none}
 a.button-link:hover{background:#0066cc}
+.resume-btn {
+    background: #28a745;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9em;
+}
+.resume-btn:hover {
+    background: #218838;
+}
 </style>
 </head>
 <body>
@@ -53,7 +64,7 @@ a.button-link:hover{background:#0066cc}
                 <th>Applicant Username</th>
                 <th>Applicant Email</th>
                 <th>Applied At</th>
-            </tr>
+                <th>Resume</th> </tr>
         </thead>
         <tbody>
         <?php foreach ($applicants as $a): ?>
@@ -63,7 +74,16 @@ a.button-link:hover{background:#0066cc}
                 <td><?php echo htmlspecialchars($a['applicant_username'] ?? $a['username'] ?? $a['applicant_name'] ?? ''); ?></td>
                 <td><?php echo htmlspecialchars($a['email'] ?? ''); ?></td>
                 <td><?php echo htmlspecialchars($a['applied_at'] ?? ''); ?></td>
-            </tr>
+                <td>
+                    <?php if (!empty($a['resume_path'])): ?>
+                        <a href="get_resume.php?file=<?php echo htmlspecialchars($a['resume_path']); ?>" 
+                           target="_blank" class="resume-btn">
+                            View Resume
+                        </a>
+                    <?php else: ?>
+                        N/A
+                    <?php endif; ?>
+                </td> </tr>
         <?php endforeach; ?>
         </tbody>
     </table>

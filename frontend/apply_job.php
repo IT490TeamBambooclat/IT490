@@ -17,10 +17,20 @@ if ($position_id === '') {
     exit;
 }
 
+$resume_request = ['type' => 'get_resume_path', 'username' => $username];
+$resume_response = mq_request($resume_request);
+
+$resume_path = null;
+if (is_array($resume_response) && !empty($resume_response['file_path'])) 
+{
+	$resume_path = $resume_response['file_path'];
+}
+
 $applyResp = mq_request([
     'type'=>'apply_job',
     'username'=>$username,
-    'position_id'=>$position_id
+    'position_id'=>$position_id,
+    'resume_path'=>$resume_path
 ]);
 
 if ($applyResp === true || (is_array($applyResp) && isset($applyResp['status']) && $applyResp['status']=='success')) {

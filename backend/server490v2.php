@@ -141,9 +141,8 @@ function doCheckExistingApplication($username, $position_id) {
     $exists = $stmt->fetchColumn() > 0;
     return ['exists' => $exists];
 }
-function doApplyJob($username, $position_id) {
+function doApplyJob($username, $position_id,$resume_path) {
     $pdo = getPDO();
-    
     $stmt = $pdo->prepare("SELECT email FROM users WHERE username = ?");
     $stmt->execute([$username]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -160,10 +159,10 @@ function doApplyJob($username, $position_id) {
     }
     
     $stmt = $pdo->prepare("INSERT INTO applied_jobs 
-                            (username, position_id, email, date_applied) 
-                            VALUES (?, ?, ?, NOW())");
+                            (username, position_id, email, date_applied,resume_path) 
+                            VALUES (?, ?, ?, NOW(),?)");
                             
-    $success = $stmt->execute([$username, $position_id, $user_email]);
+    $success = $stmt->execute([$username, $position_id, $user_email,$resume_path]);
 
     if ($success) {
         return ['status' => 'success', 'message' => 'Application recorded successfully.'];
@@ -227,7 +226,8 @@ function getApplicants($username) {
             aj.username AS applicant_username,
             aj.position_id AS job_id,
             aj.email,
-            aj.date_applied AS applied_at,
+	    aj.date_applied AS applied_at,
+            aj.resume_path,
             jd.job_title
         FROM applied_jobs aj
         JOIN jobs_data jd ON aj.position_id = jd.position_id
@@ -240,6 +240,50 @@ function getApplicants($username) {
     return ['data' => $stmt->fetchAll(PDO::FETCH_ASSOC)];//frontend is waiting for 'data' values.
 }
 
+function doCheckResumeAccess($username, $resume_path) {
+    $pdo = getPDO();
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ? AND resume_file_path = ?");
+    $stmt->execute([$username, $resume_path]);
+    if ($stmt->fetchColumn() > 0) {
+        return true; // Owner access
+    }
+
+    $sql = "
+        SELECT COUNT(*)
+        FROM applied_jobs aj
+        JOIN jobs_data jd ON aj.position_id = jd.position_id
+        WHERE jd.organization = ? AND aj.resume_path = ?
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$username, $resume_path]);
+    if ($stmt->fetchColumn() > 0) {
+        return true; // Employer have access
+    }
+
+    return false; // No access
+}
+
+function doSaveResumePath($username,$file_path)
+{
+	$pdo=getPDO();
+	$sql = "UPDATE users SET resume_file_path = ? WHERE username = ?";
+	$stmt = $pdo->prepare($sql);
+	$success = $stmt->execute([$file_path, $username]);
+	if ($success) {
+		return ['status' => 'success'];
+	} else {
+		return ['status' => 'error', 'message' => 'Failed to update resume path.'];
+	}
+}
+function doGetResumePath($username)
+{
+	$pdo = getPDO();
+	$stmt = $pdo->prepare("SELECT resume_file_path FROM users WHERE username = ?");
+	$stmt->execute([$username]);
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+	return ['file_path' => $row['resume_file_path'] ?? null];
+}
 function requestProcessor($req) {
     if (!isset($req['type'])) {
         error_log("Received request with no 'type' field: " . json_encode($req));
@@ -285,12 +329,17 @@ function requestProcessor($req) {
 	    case "check_existing_application":
 		    return doCheckExistingApplication($req['username']??'',$req['position_id']??'');
 	    case "apply_job":
-		    return doApplyJob($req['username']??'',$req['position_id']??'');
+		    return doApplyJob($req['username']??'',$req['position_id']??'',$req['resume_path']??null);
 	    case "get_user_email":
 		    return doGetUserEmail($req['username']??'');
 	    case "get_applicants":
 		    return getApplicants($req['username']??'');
-	    
+	    case "save_resume_path":
+		    return doSaveResumePath($req['username']??'',$req['file_path']??'');
+	    case "get_resume_path":
+		    return doGetResumePath($req['username']??'');
+	    case "check_resume_access":
+		    return doCheckResumeAccess($req['username']??'', $req['file_path']??'');
 	    default:
                 error_log("Unknown request type received: " . $req['type']);
                 return "Invalid request: Unknown type"; 

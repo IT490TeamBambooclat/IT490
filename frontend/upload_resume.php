@@ -2,70 +2,61 @@
 session_start();
 require_once('api_rabbitmq_client.php');
 
-if (!isset($_SESSION['username'])) {
+if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'job_seeker') {
     header("Location: index.html");
     exit;
 }
+
 $username = $_SESSION['username'];
+$target_dir = "/var/www/uploads/resumes/";
+$file_key = 'resume';
 
-$uploadDir = __DIR__ . '/uploads/resumes';
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
-}
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: jobseeker.php");
+if (!isset($_FILES[$file_key]) || $_FILES[$file_key]['error'] !== UPLOAD_ERR_OK) {
+    header("Location: jobseeker.php?upload=failed&msg=No file selected or upload error.");
     exit;
 }
 
-if (!isset($_FILES['resume']) || $_FILES['resume']['error'] !== UPLOAD_ERR_OK) {
-    header("Location: jobseeker.php?upload_error=1");
+$file_tmp = $_FILES[$file_key]['tmp_name'];
+$file_ext = strtolower(pathinfo($_FILES[$file_key]['name'], PATHINFO_EXTENSION));
+$allowed_ext = ['pdf', 'doc', 'docx'];
+
+if (!in_array($file_ext, $allowed_ext)) {
+    header("Location: jobseeker.php?upload=failed&msg=Invalid file type.");
+    exit;
+}
+if ($_FILES[$file_key]['size'] > 3000000) {
+    header("Location: jobseeker.php?upload=failed&msg=File too large.");
     exit;
 }
 
-$file = $_FILES['resume'];
-$originalName = basename($file['name']);
+$safe_filename = $username . "_resume_" . time() . "." . $file_ext;
+$target_file = $target_dir . $safe_filename;
 
-// Basic validation
-$allowed = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-$finfo = finfo_open(FILEINFO_MIME_TYPE);
-$mime = finfo_file($finfo, $file['tmp_name']);
-finfo_close($finfo);
+if (copy($file_tmp, $target_file)) {
+    error_log("DEBUG: File copy SUCCESS to " . $target_file);
+    @unlink($file_tmp); 
+    
+    $request = [
+        'type' => 'save_resume_path',
+        'username' => $username,
+        'file_path' => $safe_filename
+    ];
 
-$maxSize = 3 * 1024 * 1024; // 3MB
-if (!in_array($mime, $allowed) || $file['size'] > $maxSize) {
-    header("Location: jobseeker.php?upload_error=invalid_type_or_size");
-    exit;
-}
+    error_log("DEBUG: Sending RabbitMQ request: " . json_encode($request));
+    $response = mq_request($request);
 
-// Create a safe filename: username + timestamp + random
-$safeName = preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
-$ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-$filename = $username . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-$destination = $uploadDir . '/' . $filename;
+    error_log("DEBUG: Received RabbitMQ response: " . print_r($response, true));
 
-if (!move_uploaded_file($file['tmp_name'], $destination)) {
-    header("Location: jobseeker.php?upload_error=move_failed");
-    exit;
-}
-
-// Send message to RabbitMQ to record resume metadata (do NOT send file bytes over MQ)
-$request = [
-    'type' => 'save_resume',
-    'username' => $username,
-    'filename' => $filename,
-    'original_name' => $originalName,
-    'path' => '/uploads/resumes/' . $filename
-];
-$response = mq_request($request);
-
-// response expected true/false
-if ($response === true) {
-    header("Location: jobseeker.php?upload=success");
+    if ($response === true || (is_array($response) && isset($response['status']) && $response['status'] == 'success')) {
+        header("Location: jobseeker.php?upload=success");
+    } else {
+        unlink($target_file); 
+        error_log("ERROR: Database save failed for user " . $username);
+        header("Location: jobseeker.php?upload=failed&msg=Database save failed.");
+    }
 } else {
-    // Optionally log or remove file if backend failed
-    error_log("Failed to save resume metadata for $username");
-    header("Location: jobseeker.php?upload_error=backend");
+    error_log("FATAL ERROR: File copy FAILED from " . $file_tmp . " to " . $target_file);
+    header("Location: jobseeker.php?upload=failed&msg=File move failed on server.");
 }
 exit;
 ?>
