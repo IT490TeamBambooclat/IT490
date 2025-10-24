@@ -284,6 +284,14 @@ function doGetResumePath($username)
 	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 	return ['file_path' => $row['resume_file_path'] ?? null];
 }
+function doGetPathAndApply($username, $position_id) {
+    $pdo = getPDO();
+    $stmt = $pdo->prepare("SELECT resume_file_path FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $resume_path = $row['resume_file_path'] ?? null;
+    return doApplyJob($username, $position_id, $resume_path);
+}
 function requestProcessor($req) {
     if (!isset($req['type'])) {
         error_log("Received request with no 'type' field: " . json_encode($req));
@@ -329,7 +337,7 @@ function requestProcessor($req) {
 	    case "check_existing_application":
 		    return doCheckExistingApplication($req['username']??'',$req['position_id']??'');
 	    case "apply_job":
-		    return doApplyJob($req['username']??'',$req['position_id']??'',$req['resume_path']??null);
+		    return doGetPathAndApply($req['username'] ?? '',$req['position_id'] ?? '');
 	    case "get_user_email":
 		    return doGetUserEmail($req['username']??'');
 	    case "get_applicants":
