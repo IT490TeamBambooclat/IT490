@@ -1,1 +1,42 @@
-/home/cab7/bundles.txt.bak
+Bundles Set Up
+
+FrontEnd-Rabbit
+All rabbit files in frontend
+api_rabbitmq_client.php -- Move to Feature Bundle
+get_host_info.inc
+host.ini
+path.inc
+rabbitMQLib.inc
+testRabbitMQ.ini
+testRabbitMQServer.conf
+
+BackEnd-Rabbit
+ALl rabbit init files in the backend
+host.ini
+get_host_info.inc
+path.inc
+server490v2.php -- Move to Feature Bundle
+testRabbitMQ.ini
+
+DMZ-Rabbit
+All rabbit init files in DMZ
+host.ini
+path.inc
+rabbitMQLib.inc
+testRabbitMQ.ini
+get_host_info.inc
+
+Auth
+All files related to authentication
+/IT490/frontend/login.php
+/IT490/frontend/logout.php
+/IT490/frontend/register.php
+/IT490/frontend/register.html
+/IT490/frontend/client.php
+/IT490/backend/server490v2.php
+
+Alerts
+All files related to email alerts
+/IT490/DMZ/alertsender.php
+/IT490/DMZ/PHPMailer
+
