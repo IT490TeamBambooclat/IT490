@@ -27,7 +27,6 @@ testRabbitMQ.ini
 get_host_info.inc
 
 Auth
-All files related to authentication
 /IT490/frontend/login.php
 /IT490/frontend/logout.php
 /IT490/frontend/register.php
@@ -35,8 +34,35 @@ All files related to authentication
 /IT490/frontend/client.php
 /IT490/backend/server490v2.php
 
-Alerts
-All files related to email alerts
+Cron Job
+/IT490/DMZ/datacollector.php
+/IT490/joblistener.php
+
+Email Alerts
+/IT490/frontend/send_email_alerts.php
+/IT490/frontend/save_alerts_prefs.php
 /IT490/DMZ/alertsender.php
 /IT490/DMZ/PHPMailer
+/IT490/backend/joblistener.php
+
+Employer Features
+/IT490/frontend/employer.php
+/IT490/frontend/view_applicants.php
+/IT490/frontend/my_postings
+/IT490/frontend/post_job.php
+/IT490/frontend/employer.php
+
+Job Seeker Features
+/IT490/frontend/jobseeker.php
+/IT490/frontend/view_my_jobs.php
+/IT490/frontend/save_job.php
+/IT490/frontend/apply_job.php
+/IT490/frontend/browse_jobs.php
+/IT490/frontend/search_jobs.php
+/IT490/frontend/upload_resume.php
+/IT490/backend/server490v2.php
+
+Roles
+/IT490/frontend/role_select.php
+/IT490/frontend/set_role.php
 
