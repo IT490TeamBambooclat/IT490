@@ -1,0 +1,177 @@
+Nov 11 17:09:49 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:09:49 ali (php)[4750]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:09:49 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:09:49 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:09:54 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 1.
+Nov 11 17:09:54 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:09:54 ali (php)[4755]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:09:54 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:09:54 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:09:59 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 2.
+Nov 11 17:09:59 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:09:59 ali (php)[4759]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:09:59 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:09:59 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:10:04 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 3.
+Nov 11 17:10:04 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:10:04 ali (php)[4778]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:10:04 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:10:04 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:10:10 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 4.
+Nov 11 17:10:10 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:10:10 ali (php)[4781]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:10:10 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:10:10 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:10:15 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 5.
+Nov 11 17:10:15 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:10:15 ali (php)[4785]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:10:15 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:10:15 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:10:20 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 6.
+Nov 11 17:10:20 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:10:20 ali (php)[4881]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:10:20 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:10:20 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:10:25 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 7.
+Nov 11 17:10:25 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:10:25 ali (php)[5514]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:10:25 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:10:25 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:10:31 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 8.
+Nov 11 17:10:31 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:10:31 ali (php)[11449]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:10:31 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:10:31 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:10:36 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 9.
+Nov 11 17:10:36 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:10:36 ali (php)[11617]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:10:36 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:10:36 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:10:41 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 10.
+Nov 11 17:10:41 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:10:41 ali (php)[11620]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:10:41 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:10:41 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:10:46 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 11.
+Nov 11 17:10:46 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:10:46 ali (php)[11626]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:10:46 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:10:46 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:10:52 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 12.
+Nov 11 17:10:52 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:10:52 ali (php)[11629]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:10:52 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:10:52 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:10:57 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 13.
+Nov 11 17:10:57 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:10:57 ali (php)[11633]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:10:57 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:10:57 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:11:02 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 14.
+Nov 11 17:11:02 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:11:02 ali (php)[11639]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:11:02 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:11:02 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:11:07 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 15.
+Nov 11 17:11:07 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:11:07 ali (php)[11643]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:11:07 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:11:07 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:11:12 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 16.
+Nov 11 17:11:12 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:11:12 ali (php)[11646]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:11:12 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:11:12 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:11:18 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 17.
+Nov 11 17:11:18 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:11:18 ali (php)[11652]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:11:18 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:11:18 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:11:23 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 18.
+Nov 11 17:11:23 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:11:23 ali (php)[11655]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:11:23 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:11:23 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:11:28 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 19.
+Nov 11 17:11:28 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:11:28 ali (php)[11699]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:11:28 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:11:28 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:11:33 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 20.
+Nov 11 17:11:33 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:11:33 ali (php)[11702]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:11:33 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:11:33 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:11:39 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 21.
+Nov 11 17:11:39 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:11:39 ali (php)[11706]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:11:39 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:11:39 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:11:44 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 22.
+Nov 11 17:11:44 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:11:44 ali (php)[11710]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:11:44 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:11:44 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:11:49 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 23.
+Nov 11 17:11:49 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:11:49 ali (php)[11718]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:11:49 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:11:49 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:11:54 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 24.
+Nov 11 17:11:54 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:11:54 ali (php)[11722]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:11:54 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:11:54 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:12:00 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 25.
+Nov 11 17:12:00 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:12:00 ali (php)[11726]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:12:00 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:12:00 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:12:05 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 26.
+Nov 11 17:12:05 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:12:05 ali (php)[11733]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:12:05 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:12:05 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:12:10 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 27.
+Nov 11 17:12:10 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:12:10 ali (php)[11736]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:12:10 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:12:10 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:12:15 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 28.
+Nov 11 17:12:15 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:12:15 ali (php)[11754]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:12:15 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:12:15 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:12:21 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 29.
+Nov 11 17:12:21 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:12:21 ali (php)[11760]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:12:21 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:12:21 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:12:26 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 30.
+Nov 11 17:12:26 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:12:26 ali (php)[11764]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:12:26 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:12:26 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:12:31 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 31.
+Nov 11 17:12:31 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:12:31 ali (php)[11807]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:12:31 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:12:31 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:12:36 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 32.
+Nov 11 17:12:36 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:12:36 ali (php)[11812]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:12:36 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:12:36 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:12:42 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 33.
+Nov 11 17:12:42 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:12:42 ali (php)[11815]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:12:42 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:12:42 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:12:47 ali systemd[1]: datacollector.service: Scheduled restart job, restart counter is at 34.
+Nov 11 17:12:47 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:12:47 ali (php)[11819]: [0;1;31m[0;1;39m[0;1;31mdatacollector.service: Changing to the requested working directory failed: Permission denied[0m
+Nov 11 17:12:47 ali systemd[1]: [0;1;39m[0;1;31m[0;1;39mdatacollector.service: Main process exited, code=exited, status=200/CHDIR[0m
+Nov 11 17:12:47 ali systemd[1]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdatacollector.service: Failed with result 'exit-code'.[0m
+Nov 11 17:12:48 ali systemd[1]: Stopped datacollector.service - IT490 Data Collector Service.
+Nov 11 17:12:48 ali systemd[1]: Started datacollector.service - IT490 Data Collector Service.
+Nov 11 17:13:08 ali systemd[1]: datacollector.service: Deactivated successfully.
