@@ -109,7 +109,8 @@ REMOTE_DIR="${DEPLOY_BASE_DIR}/${REMOTE_SUBDIR}"
 echo "Copying to ${DEPLOY_USER}@${DEPLOY_HOST}:${REMOTE_DIR}..."
 scp "$ARCHIVE" "${DEPLOY_USER}@${DEPLOY_HOST}:${REMOTE_DIR}/"
 
-echo "Done. On deployment VM you can run:"
-echo "  cd ${REMOTE_DIR}"
-echo "  tar xzf ${ARCHIVE}"
+echo "Calling register script on deployment VM..."
+ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "/home/cab7/Git/IT490/Deployment/register_bundle.sh '${BUNDLE}'"
+
+echo "Bundle '${BUNDLE}'  has been registered into the DB"
 
