@@ -4,6 +4,27 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
+//dlogger function 
+function dlog($error)
+{
+	error_log($error);
+	try
+	{
+		$client=new rabbitMQClient("testRabbitMQ.ini",'DLogging');
+		$request= 
+		[
+			'type' => 'dlog',
+			'timestamp'=> date('Y-m-d H:i:s'),
+			'source_host' => gethostname(),
+			'message' => $error
+		];
+		$client->publish($request);
+	}catch (Exception $e)
+	{
+		error_log("DLogging Failed").$e->getMessage());
+	}
+}
+
 function doGetEmployerJobs($organization_username) {
     $pdo = getPDO();
     $sql = "SELECT job_title AS title,location,qualification_summary AS qualifications,major_duties AS description,apply_uri AS external_link FROM jobs_data WHERE organization = ?";
@@ -39,11 +60,13 @@ function doSaveJob($username, $position_id) {
     // 1. Check if the job actually exists in jobs_data
     $stmt = $pdo->prepare("SELECT position_id FROM jobs_data WHERE position_id = ?");
     $stmt->execute([$position_id]);
-    if (!$stmt->fetch()) {
-        return ['status' => 'error', 'message' => 'Job ID not found in database.'];
+    if (!$stmt->fetch()) 
+    {
+	    dlog("Job ID not found in database".$position_id);//line for dlogger
+	    return ['status' => 'error', 'message' => 'Job ID not found in database.'];
     }
 
-    // 2. Check if the job is already saved by the user
+    // 2. Check if the job was already saved by the user
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM saved_jobs WHERE username = ? AND position_id = ?");
     $stmt->execute([$username, $position_id]);
     if ($stmt->fetchColumn() > 0) {
@@ -59,8 +82,10 @@ function doSaveJob($username, $position_id) {
 
     if ($success) {
         return ['status' => 'success', 'message' => 'Job saved. You can view it in your dashboard.'];
-    } else {
-        return ['status' => 'error', 'message' => 'Database insert failed.'];
+    } else 
+    {
+	    dlog("Database Insert Failed".$position_id);
+	    return ['status' => 'error', 'message' => 'Database insert failed.'];
     }
 }
 function getPDO() {
@@ -76,6 +101,7 @@ function doRegister($username, $password, $role, $email, $alertEmailEnabled) {
     $stmt->execute([$username]);
     if ($stmt->fetch()) 
     {
+	dlog("register failed: username already exists".$username);
         return false;
     }
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
@@ -97,8 +123,10 @@ function doLogin($username, $password) {
     $stmt->execute([$username]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$row || !password_verify($password, $row['password_hash'])) {
-        return false;
+    if (!$row || !password_verify($password, $row['password_hash'])) 
+    {
+	    dlog("Login Failed: Wrong password".$username);
+	    return false;
     }
 
     $sid = bin2hex(random_bytes(16));
@@ -118,8 +146,16 @@ function doValidate($sid) {
     $stmt = $pdo->prepare("SELECT username,expires_at FROM sessions WHERE session_id=?");
     $stmt->execute([$sid]);
     $row = $stmt->fetch();
-    if (!$row) return false;
-    if (strtotime($row['expires_at']) < time()) return false;
+    if (!$row) {
+        //dlog lines
+        dlog("Session validation failed: Session ID not found: " . $sid);
+        return false;
+    }
+    if (strtotime($row['expires_at']) < time()) {
+        //dlog line
+        dlog("Session validation failed: Session ID expired: " . $sid);
+        return false;
+    }
     return true;
 }
 function doGetUserEmail($username) {
@@ -130,7 +166,9 @@ function doGetUserEmail($username) {
 
     if ($row) {
         return ['email' => $row['email']];
-    } else {
+    } else 
+    {
+	dlog("Email not found for username: ".$username);
         return ['email' => ''];
     }
 }
@@ -149,12 +187,14 @@ function doApplyJob($username, $position_id,$resume_path) {
     $user_email = $row['email'] ?? '';
     
     if (empty($user_email)) {
+         dlog("Apply job failed: User email not found for: " . $username);
          return ['status' => 'error', 'message' => 'User email not found.'];
     }
 
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM applied_jobs WHERE username = ? AND position_id = ?");
     $stmt->execute([$username, $position_id]);
     if ($stmt->fetchColumn() > 0) {
+        dlog("Apply job failed: User " . $username . " already applied to " . $position_id);
         return ['status' => 'error', 'message' => 'You have already applied to this job.'];
     }
     
@@ -167,6 +207,7 @@ function doApplyJob($username, $position_id,$resume_path) {
     if ($success) {
         return ['status' => 'success', 'message' => 'Application recorded successfully.'];
     } else {
+        dlog("Apply job database insert failed for: " . $position_id);
         return ['status' => 'error', 'message' => 'Database insert failed.'];
     }
 }
@@ -192,29 +233,22 @@ function doGetJobs($scope, $organization = null) {
     $stmt->execute($params);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-function doSearchJobsLocal($query) {
-    error_log("Attempting local job search for query: " . $query);
+function doSearchJobsLocal($query) 
+{
+	dlog("Attempting local job search for query".$query);
     if (empty($query)) {
         return ['results' => []];
     }
-    
     $pdo = getPDO();
-    // Use 'title', 'organization', 'location', and a placeholder for 'apply_link' and 'summary'
-    // to match the expected structure of the frontend display logic.
     $select_fields = "job_title as title, organization, location, date_posted, CONCAT('ID:', id) as apply_link, 'Local job post.' as summary";
-    
-    // Use LIKE to find the query string anywhere in the job title or organization.
     $sql = "SELECT $select_fields
             FROM jobs_data
             WHERE job_title LIKE ? OR organization LIKE ?
             ORDER BY ingestion_date DESC";
     
     $search_param = "%" . $query . "%";
-    
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$search_param, $search_param]);
-    
-    // Package results in the expected format
     return ['results' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
 }
 function getApplicants($username) {
@@ -260,7 +294,7 @@ function doCheckResumeAccess($username, $resume_path) {
     if ($stmt->fetchColumn() > 0) {
         return true; // Employer have access
     }
-
+    dlog("resume access denied for user: ".$username."trying to access file in path: ".$resume_path);
     return false; // No access
 }
 
@@ -273,6 +307,7 @@ function doSaveResumePath($username,$file_path)
 	if ($success) {
 		return ['status' => 'success'];
 	} else {
+		dlog("Failed to update resume path: ".$file_path."for user: ".$username);
 		return ['status' => 'error', 'message' => 'Failed to update resume path.'];
 	}
 }
@@ -294,13 +329,15 @@ function doGetPathAndApply($username, $position_id) {
 }
 function requestProcessor($req) {
     if (!isset($req['type'])) {
-        error_log("Received request with no 'type' field: " . json_encode($req));
+	    error_log("Received request with no 'type' field: " . json_encode($req));
+	    dlog("Received request with no type field".json_encode($req));
         return "Invalid request: Missing type field";
     }
 
     error_log("Received request type: " . $req['type']); 
+    dlog("Received request type: ".$req['type']);
     
-    try { // <-- START OF ERROR HANDLING
+    try {
 	    switch ($req['type']) {
 	    case "register":
                 return doRegister($req['username'],$req['password'],$req['role'],$req['email'],$req['alerts_email_enabled']??0);
@@ -349,16 +386,19 @@ function requestProcessor($req) {
 	    case "check_resume_access":
 		    return doCheckResumeAccess($req['username']??'', $req['file_path']??'');
 	    default:
-                error_log("Unknown request type received: " . $req['type']);
+		    error_log("Unknown request type received: " . $req['type']);
+		    dlog("Unknown request type".$req['type']);
                 return "Invalid request: Unknown type"; 
         }
-    } catch (PDOException $e) { // <-- CATCH DATABASE ERRORS
+    } catch (PDOException $e) { //CATCH DATABASE ERRORS
         $error_message = "Database Error in processing " . $req['type'] . ": " . $e->getMessage();
-        error_log($error_message);
+	error_log($error_message);
+	dlog($error_message);
         return $error_message;
-    } catch (Exception $e) { // <-- CATCH ALL OTHER ERRORS
+    } catch (Exception $e) { //CATCH ALL OTHER ERRORS
         $error_message = "General Error in processing " . $req['type'] . ": " . $e->getMessage();
-        error_log($error_message);
+	error_log($error_message);
+	dlog($error_message);
         return $error_message;
     }
 }
