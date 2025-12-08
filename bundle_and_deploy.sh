@@ -22,7 +22,7 @@ BUNDLE="$1"
 # Pick files for each bundle and map to remote subfolder name
 case "$BUNDLE" in
     frontend_rabbit)
-        REMOTE_SUBDIR="frontend_rabbit"
+        REMOTE_SUBDIR="frontend-rabbit"
         FILES="frontend/get_host_info.inc
 frontend/host.ini
 frontend/path.inc
