@@ -13,7 +13,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Give only 1 bundle name
 if [ $# -ne 1 ]; then
     echo "Usage: $0 <bundle-name>"
-    echo "Bundles: frontend_rabbit backend-rabbit dmz-rabbit auth cron alerts emp_features jseeker_features roles"
+    echo "Bundles: frontend-rabbit backend-rabbit dmz-rabbit auth cron alerts emp_features jseeker_features roles"
     exit 1
 fi
 
