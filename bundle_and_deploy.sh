@@ -62,7 +62,7 @@ backend/joblistener.php"
     alerts)
         REMOTE_SUBDIR="alerts"
         FILES="frontend/send_email_alerts.php
-frontend/save_alerts_prefs.php
+frontend/save_alert_prefs.php
 DMZ/alertsender.php
 DMZ/PHPMailer
 backend/joblistener.php"
