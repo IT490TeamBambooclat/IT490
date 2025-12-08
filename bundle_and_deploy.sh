@@ -71,7 +71,7 @@ backend/joblistener.php"
         REMOTE_SUBDIR="emp_features"
         FILES="frontend/employer.php
 frontend/view_applicants.php
-frontend/my_postings
+frontend/my_postings.php
 frontend/post_job.php"
         ;;
     jseeker_features)
