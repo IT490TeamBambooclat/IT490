@@ -9,102 +9,123 @@ TABLE_NAME="bundle_deployments"
 
 SSH_USER="deployment"
 
-# EDIT THESEthangs to  REAL IPs <<<
-QA_FRONTEND_HOST="qa-frontend"   # e.g. 192.168.195.101
-QA_BACKEND_HOST="qa-backend"     # e.g. 192.168.195.102
-QA_DMZ_HOST="qa-dmz"             # e.g. 192.168.195.103
+# EDIT THESE to REAL IPs <<<
+QA_FRONTEND_HOST="100.70.27.95"   # e.g. 192.168.195.101
+QA_BACKEND_HOST="100.90.181.39"   # e.g. 192.168.195.102 (currently not used in rollback loop)
+QA_DMZ_HOST="100.70.234.127"      # e.g. 192.168.195.103
 
 QA_REMOTE_BASE="/var/jobseek"
-
 
 mysql_fetch() {
   mysql -N -B -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "$1"
 }
 
-if [[ $# -lt 1 || $# -gt 2 ]]; then
-  echo "Usage: $0 <bundle_name> [version_number]"
-  echo "  If version_number is omitted, rolls back to previous version."
-  exit 1
+echo "[INFO] Looking for bundles with status='deployed'..."
+rows=$(mysql_fetch "SELECT ID, bundle_name, version_number, file_path
+                    FROM $TABLE_NAME
+                    WHERE status='deployed'
+                    ORDER BY bundle_name, version_number;")
+
+if [[ -z "${rows:-}" ]]; then
+  echo "[INFO] No deployed bundles found to evaluate."
+  exit 0
 fi
 
-BUNDLE_NAME="$1"
+# Loop over each deployed bundle and ask pass/fail
+while IFS=$'\t' read -r ID BUNDLE_NAME CURRENT_VERSION FILE_PATH; do
+  echo "=================================================="
+  echo "[INFO] Deployed bundle:"
+  echo "  ID:            $ID"
+  echo "  Bundle name:   $BUNDLE_NAME"
+  echo "  Version:       $CURRENT_VERSION"
+  echo "  Archive path:  $FILE_PATH"
 
-if [[ $# == 2 ]]; then
-  TARGET_VERSION="$2"
-  echo "[INFO] Rolling back QA bundle '$BUNDLE_NAME' to version $TARGET_VERSION (explicit)."
-else
-  echo "[INFO] Determining previous version for bundle '$BUNDLE_NAME'..."
+  while true; do
+    read -rp "Mark this bundle as (p)ass or (f)ail? [p/f]: " ANSWER
+    case "$ANSWER" in
+      p|P)
+        echo "[INFO] Marking bundle ID $ID as 'pass' in DB..."
+        mysql_fetch "UPDATE $TABLE_NAME SET status='pass' WHERE ID=$ID;"
+        break
+        ;;
+      f|F)
+        echo "[INFO] Marking bundle ID $ID as 'failed' in DB..."
+        mysql_fetch "UPDATE $TABLE_NAME SET status='failed' WHERE ID=$ID;"
 
-  CURRENT_VERSION=$(mysql_fetch "SELECT MAX(version_number)
-                                 FROM $TABLE_NAME
-                                 WHERE bundle_name='$BUNDLE_NAME';")
+        echo "[INFO] Determining previous version for bundle '$BUNDLE_NAME'..."
 
-  if [[ -z "${CURRENT_VERSION:-}" ]]; then
-    echo "[ERROR] No versions found for bundle '$BUNDLE_NAME'."
-    exit 1
-  fi
+        TARGET_VERSION=$(mysql_fetch "SELECT MAX(version_number)
+                                      FROM $TABLE_NAME
+                                      WHERE bundle_name='$BUNDLE_NAME'
+                                        AND version_number < $CURRENT_VERSION;")
 
-  TARGET_VERSION=$(mysql_fetch "SELECT MAX(version_number)
-                                FROM $TABLE_NAME
-                                WHERE bundle_name='$BUNDLE_NAME'
-                                  AND version_number < $CURRENT_VERSION;")
+        if [[ -z "${TARGET_VERSION:-}" ]]; then
+          echo "[ERROR] No previous version found for bundle '$BUNDLE_NAME' (current is $CURRENT_VERSION)."
+          echo "[WARN] Cannot rollback QA for this failure."
+          break
+        fi
 
-  if [[ -z "${TARGET_VERSION:-}" ]]; then
-    echo "[ERROR] No previous version found for bundle '$BUNDLE_NAME' (current is $CURRENT_VERSION)."
-    exit 1
-  fi
+        echo "[INFO] Rolling back QA bundle '$BUNDLE_NAME' to version $TARGET_VERSION..."
 
-  echo "[INFO] Current version: $CURRENT_VERSION, rolling back QA to: $TARGET_VERSION"
-fi
+        # Get the DB row for the chosen rollback version
+        ROW=$(mysql_fetch "SELECT ID, file_path
+                           FROM $TABLE_NAME
+                           WHERE bundle_name='$BUNDLE_NAME'
+                             AND version_number=$TARGET_VERSION
+                           LIMIT 1;")
 
-# Get the DB row for the chosen version
-ROW=$(mysql_fetch "SELECT ID, file_path
-                   FROM $TABLE_NAME
-                   WHERE bundle_name='$BUNDLE_NAME'
-                     AND version_number=$TARGET_VERSION
-                   LIMIT 1;")
+        if [[ -z "${ROW:-}" ]]; then
+          echo "[ERROR] No DB entry found for bundle '$BUNDLE_NAME' version $TARGET_VERSION."
+          echo "[WARN] Cannot rollback QA for this failure."
+          break
+        fi
 
-if [[ -z "${ROW:-}" ]]; then
-  echo "[ERROR] No DB entry found for bundle '$BUNDLE_NAME' version $TARGET_VERSION."
-  exit 1
-fi
+        ROLLBACK_ID=$(echo "$ROW" | awk '{print $1}')
+        ROLLBACK_FILE_PATH=$(echo "$ROW" | awk '{print $2}')
 
-ROLLBACK_ID=$(echo "$ROW" | awk '{print $1}')
-FILE_PATH=$(echo "$ROW" | awk '{print $2}')
+        echo "[INFO] Using rollback DB row ID $ROLLBACK_ID with archive path: $ROLLBACK_FILE_PATH"
 
-echo "[INFO] Using DB row ID $ROLLBACK_ID with archive path: $FILE_PATH"
+        if [[ ! -f "$ROLLBACK_FILE_PATH" ]]; then
+          echo "[ERROR] Archive file not found on Deployment VM: $ROLLBACK_FILE_PATH"
+          echo "[WARN] Cannot rollback QA for this failure."
+          break
+        fi
 
-if [[ ! -f "$FILE_PATH" ]]; then
-  echo "[ERROR] Archive file not found on Deployment VM: $FILE_PATH"
-  exit 1
-fi
+        ARCHIVE_NAME="$(basename "$ROLLBACK_FILE_PATH")"
+        REMOTE_ARCHIVE="$QA_REMOTE_BASE/$ARCHIVE_NAME"
 
-ARCHIVE_NAME="$(basename "$FILE_PATH")"
-REMOTE_ARCHIVE="$QA_REMOTE_BASE/$ARCHIVE_NAME"
+        # Deploy selected rollback version to the QA hosts
+        for HOST in "$QA_FRONTEND_HOST" "$QA_DMZ_HOST"; do
+          echo "[INFO] --- QA host: $HOST ---"
 
-# Deploy selected version to all three QA hosts
-for HOST in "$QA_FRONTEND_HOST" "$QA_BACKEND_HOST" "$QA_DMZ_HOST"; do
-  echo "[INFO] --- QA host: $HOST ---"
+          ssh "${SSH_USER}@${HOST}" "mkdir -p '$QA_REMOTE_BASE'"
 
- 
-  ssh "${SSH_USER}@${HOST}" "mkdir -p '$QA_REMOTE_BASE'"
+          echo "[INFO] Copying rollback archive to $HOST:$REMOTE_ARCHIVE..."
+          scp "$ROLLBACK_FILE_PATH" "${SSH_USER}@${HOST}:$REMOTE_ARCHIVE"
 
-  echo "[INFO] Copying archive to $HOST:$REMOTE_ARCHIVE..."
-  scp "$FILE_PATH" "${SSH_USER}@${HOST}:$REMOTE_ARCHIVE"
+          echo "[INFO] Extracting rollback archive on $HOST into $QA_REMOTE_BASE..."
+          ssh "${SSH_USER}@${HOST}" "cd '$QA_REMOTE_BASE' && tar xzf '$REMOTE_ARCHIVE'"
 
-  echo "[INFO] Extracting archive on $HOST into $QA_REMOTE_BASE..."
-  ssh "${SSH_USER}@${HOST}" "cd '$QA_REMOTE_BASE' && tar xzf '$REMOTE_ARCHIVE'"
+          # Optional: remove the archive afterwards
+          # ssh "${SSH_USER}@${HOST}" "rm -f '$REMOTE_ARCHIVE'"
 
- 
-  # ssh "${SSH_USER}@${HOST}" "rm -f '$REMOTE_ARCHIVE'"
+          echo "[INFO] Rollback bundle '$BUNDLE_NAME' version $TARGET_VERSION extracted on $HOST."
+        done
 
-  echo "[INFO] Rollback bundle '$BUNDLE_NAME' version $TARGET_VERSION extracted on $HOST."
-done
+        echo "[INFO] Marking rollback bundle ID $ROLLBACK_ID (version $TARGET_VERSION) as 'deployed' in DB..."
+        mysql_fetch "UPDATE $TABLE_NAME SET status='deployed' WHERE ID=$ROLLBACK_ID;"
 
-echo "[INFO] Marking bundle ID $ROLLBACK_ID (version $TARGET_VERSION) as 'deployed' in DB..."
-mysql_fetch "UPDATE $TABLE_NAME SET status='deployed' WHERE ID=$ROLLBACK_ID;"
+        echo "[INFO] QA rollback of bundle '$BUNDLE_NAME' to version $TARGET_VERSION complete."
+        break
+        ;;
+      *)
+        echo "[WARN] Please answer 'p' for pass or 'f' for fail."
+        ;;
+    esac
+  done
+
+done <<< "$rows"
 
 echo "=================================================="
-echo " QA rollback of bundle '$BUNDLE_NAME' to version $TARGET_VERSION complete."
-
+echo "[INFO] Pass/fail evaluation complete for all deployed bundles."
 
