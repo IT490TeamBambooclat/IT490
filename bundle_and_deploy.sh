@@ -3,7 +3,7 @@
 set -e
 
 # deployment settings 
-DEPLOY_USER="cab7"                 # deployment VM user
+DEPLOY_USER="deployment"                 # deployment VM user
 DEPLOY_HOST="100.107.92.80"        # deployment VM IP
 DEPLOY_BASE_DIR="/home/cab7/Bundles"  # base directory;
 
