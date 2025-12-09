@@ -1,30 +1,21 @@
 #!/usr/bin/env bash
-# Safety options:
-# -e : exit on error
-# -u : treat unset vars as errors
-# -o pipefail : pipeline fails if any command fails
 set -euo pipefail
 
-########################################
 # DB settings
-########################################
 DB_NAME="deployment"
 DB_USER="admin"
 DB_PASS="Chrisb200!"
 TABLE_NAME="bundle_deployments"
 
-########################################
-# QA cluster settings
-########################################
 SSH_USER="deployment"
 
-# >>> EDIT THESE TO YOUR REAL QA HOSTNAMES / IPs <<<
+# EDIT THESEthangs to  REAL IPs <<<
 QA_FRONTEND_HOST="qa-frontend"   # e.g. 192.168.195.101
 QA_BACKEND_HOST="qa-backend"     # e.g. 192.168.195.102
 QA_DMZ_HOST="qa-dmz"             # e.g. 192.168.195.103
 
 QA_REMOTE_BASE="/var/jobseek"
-########################################
+
 
 mysql_fetch() {
   mysql -N -B -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "$1"
@@ -38,7 +29,7 @@ fi
 
 BUNDLE_NAME="$1"
 
-if [[ $# -eq 2 ]]; then
+if [[ $# == 2 ]]; then
   TARGET_VERSION="$2"
   echo "[INFO] Rolling back QA bundle '$BUNDLE_NAME' to version $TARGET_VERSION (explicit)."
 else
@@ -92,5 +83,28 @@ ARCHIVE_NAME="$(basename "$FILE_PATH")"
 REMOTE_ARCHIVE="$QA_REMOTE_BASE/$ARCHIVE_NAME"
 
 # Deploy selected version to all three QA hosts
-for HOST in "$QA_FRONTE_
+for HOST in "$QA_FRONTEND_HOST" "$QA_BACKEND_HOST" "$QA_DMZ_HOST"; do
+  echo "[INFO] --- QA host: $HOST ---"
+
+ 
+  ssh "${SSH_USER}@${HOST}" "mkdir -p '$QA_REMOTE_BASE'"
+
+  echo "[INFO] Copying archive to $HOST:$REMOTE_ARCHIVE..."
+  scp "$FILE_PATH" "${SSH_USER}@${HOST}:$REMOTE_ARCHIVE"
+
+  echo "[INFO] Extracting archive on $HOST into $QA_REMOTE_BASE..."
+  ssh "${SSH_USER}@${HOST}" "cd '$QA_REMOTE_BASE' && tar xzf '$REMOTE_ARCHIVE'"
+
+ 
+  # ssh "${SSH_USER}@${HOST}" "rm -f '$REMOTE_ARCHIVE'"
+
+  echo "[INFO] Rollback bundle '$BUNDLE_NAME' version $TARGET_VERSION extracted on $HOST."
+done
+
+echo "[INFO] Marking bundle ID $ROLLBACK_ID (version $TARGET_VERSION) as 'deployed' in DB..."
+mysql_fetch "UPDATE $TABLE_NAME SET status='deployed' WHERE ID=$ROLLBACK_ID;"
+
+echo "=================================================="
+echo " QA rollback of bundle '$BUNDLE_NAME' to version $TARGET_VERSION complete."
+
 
