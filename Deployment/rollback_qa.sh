@@ -10,9 +10,9 @@ TABLE_NAME="bundle_deployments"
 SSH_USER="deployment"
 
 # EDIT THESE to REAL IPs <<<
-QA_FRONTEND_HOST="100.70.27.95"   # e.g. 192.168.195.101
-QA_BACKEND_HOST="100.90.181.39"   # e.g. 192.168.195.102 (currently not used in rollback loop)
-QA_DMZ_HOST="100.70.234.127"      # e.g. 192.168.195.103
+QA_FRONTEND_HOST="100.70.27.95"
+QA_BACKEND_HOST="100.90.181.39"
+QA_DMZ_HOST="100.70.234.127"
 
 QA_REMOTE_BASE="/var/jobseek"
 
@@ -41,11 +41,17 @@ while IFS=$'\t' read -r ID BUNDLE_NAME CURRENT_VERSION FILE_PATH; do
   echo "  Archive path:  $FILE_PATH"
 
   while true; do
-    read -rp "Mark this bundle as (p)ass or (f)ail? [p/f]: " ANSWER
+    # *** IMPORTANT PART: force read from /dev/tty ***
+    echo -n "Mark this bundle as pass or fail [p/f] "
+    if ! IFS= read -r ANSWER < /dev/tty; then
+      echo "[ERROR] Could not read from terminal (/dev/tty)."
+      exit 1
+    fi
+
     case "$ANSWER" in
       p|P)
         echo "[INFO] Marking bundle ID $ID as 'pass' in DB..."
-        mysql_fetch "UPDATE $TABLE_NAME SET status='pass' WHERE ID=$ID;"
+        mysql_fetch "UPDATE $TABLE_NAME SET status='passed' WHERE ID=$ID;"
         break
         ;;
       f|F)
@@ -95,7 +101,7 @@ while IFS=$'\t' read -r ID BUNDLE_NAME CURRENT_VERSION FILE_PATH; do
         REMOTE_ARCHIVE="$QA_REMOTE_BASE/$ARCHIVE_NAME"
 
         # Deploy selected rollback version to the QA hosts
-        for HOST in "$QA_FRONTEND_HOST" "$QA_DMZ_HOST"; do
+        for HOST in "$QA_DMZ_HOST"; do
           echo "[INFO] --- QA host: $HOST ---"
 
           ssh "${SSH_USER}@${HOST}" "mkdir -p '$QA_REMOTE_BASE'"
@@ -105,9 +111,6 @@ while IFS=$'\t' read -r ID BUNDLE_NAME CURRENT_VERSION FILE_PATH; do
 
           echo "[INFO] Extracting rollback archive on $HOST into $QA_REMOTE_BASE..."
           ssh "${SSH_USER}@${HOST}" "cd '$QA_REMOTE_BASE' && tar xzf '$REMOTE_ARCHIVE'"
-
-          # Optional: remove the archive afterwards
-          # ssh "${SSH_USER}@${HOST}" "rm -f '$REMOTE_ARCHIVE'"
 
           echo "[INFO] Rollback bundle '$BUNDLE_NAME' version $TARGET_VERSION extracted on $HOST."
         done

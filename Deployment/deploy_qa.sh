@@ -139,7 +139,7 @@ while IFS=$'\t' read -r ID BUNDLE_NAME FILE_PATH; do
   esac
 
   # Deploy to all three QA VMs
-  for HOST in "$QA_FRONTEND_HOST" "$QA_DMZ_HOST"; do
+  for HOST in  "$QA_DMZ_HOST"; do
     echo "[INFO] --- QA host: $HOST ---"
 
     # Ensure remote base directory exists
