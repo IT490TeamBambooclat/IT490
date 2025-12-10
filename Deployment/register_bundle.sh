@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-DB_NAME="deployment"              
-DB_USER="admin"            
-DB_PASS="Chrisb200!"         
-TABLE_NAME="bundle_deployments"
+db_name="deployment"              
+db_user="admin"            
+db_pass="Chrisb200!"        
+table="bundle_deployments"
 
-DEPLOY_BASE_DIR="/home/cab7/Bundles"
+bundles_dir="/home/cab7/Bundles"
 
 if [ $# -ne 1 ]; then
   echo "Usage: $0 <bundle-name>"
@@ -14,36 +14,34 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-BUNDLE_NAME="$1"   
+bundle="$1"   
 
-BUNDLE_DIR="${DEPLOY_BASE_DIR}/${BUNDLE_NAME}"
-INCOMING_ARCHIVE="${BUNDLE_DIR}/${BUNDLE_NAME}.tar.gz"
+archive="${bundles_dir}/${bundle}/${bundle}.tar.gz"
 
 
-if [ ! -f "$INCOMING_ARCHIVE" ]; then
-  echo "ERROR: Incoming archive not found: $INCOMING_ARCHIVE"
+if [ ! -f "$archive" ]; then
+  echo "Bad archive: $archive"
   exit 1
 fi
 
-VERSION_NUMBER=$(mysql -N -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "
+version_num=$(mysql -N -u "$db_user" -p"$db_pass" "$db_name" -e "
   Select Coalesce(Max(version_number) + 1, 1)
-  From ${TABLE_NAME}
-  Where bundle_name = '${BUNDLE_NAME}';
+  From ${table}
+  Where bundle_name = '${bundle}';
 ")
 
 
-FINAL_ARCHIVE="${BUNDLE_DIR}/${BUNDLE_NAME}_v${VERSION_NUMBER}.tar.gz"
-mv "$INCOMING_ARCHIVE" "$FINAL_ARCHIVE"
+result_archive="${bundle_dir}/${bundle}_v${version_num}.tar.gz"
+mv "$archive" "$result_archive"
 
-echo "Registered bundle '${BUNDLE_NAME}' as version ${VERSION_NUMBER}"
-echo "  File path: ${FINAL_ARCHIVE}"
+echo "Here"
 
-mysql -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" <<EOF
-Insert Into ${TABLE_NAME} 
+mysql -u "$db_user" -p"$db_pass" "$db_name" <<EOF
+Insert Into ${table} 
 (bundle_name, version_number, file_path, status)
 Values
-('${BUNDLE_NAME}', ${VERSION_NUMBER}, '${FINAL_ARCHIVE}', 'pending');
+('${bundle}', ${version_num}, '${result_archive}', 'pending');
 EOF
 
-echo "DB updated (status = 'pending')."
+echo "Done"
 

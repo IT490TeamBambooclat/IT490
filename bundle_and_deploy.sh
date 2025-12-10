@@ -1,29 +1,19 @@
 #!/usr/bin/env bash
-# Stop on any error
 set -e
+ 
+dep_user="cab7"
+dep_ip="100.107.92.80"        
+bundles_dir="/home/cab7/Bundles"  
 
-# deployment settings 
-DEPLOY_USER="cab7"                 # deployment VM user
-DEPLOY_HOST="100.107.92.80"        # deployment VM IP
-DEPLOY_BASE_DIR="/home/cab7/Bundles"  # base directory;
+ 
+project_location="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Get folder where this script is 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+bundle="$1"
 
-# Give only 1 bundle name
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <bundle-name>"
-    echo "Bundles: frontend-rabbit backend-rabbit dmz-rabbit auth cron alerts emp_features jseeker_features roles"
-    exit 1
-fi
-
-BUNDLE="$1"
-
-# Pick files for each bundle and map to remote subfolder name
-case "$BUNDLE" in
+case "$bundle" in
     frontend-rabbit)
-        REMOTE_SUBDIR="frontend-rabbit"
-        FILES="frontend/get_host_info.inc
+        subdir="frontend-rabbit"
+        bundle_files="frontend/get_host_info.inc
 frontend/host.ini
 frontend/path.inc
 frontend/rabbitMQLib.inc
@@ -31,23 +21,23 @@ frontend/testRabbitMQ.ini
 frontend/testRabbitMQServer.conf"
         ;;
     backend-rabbit)
-        REMOTE_SUBDIR="backend-rabbit"
-        FILES="backend/host.ini
+        subdir="backend-rabbit"
+        bundle_files="backend/host.ini
 backend/get_host_info.inc
 backend/path.inc
 backend/testRabbitMQ.ini"
         ;;
     dmz-rabbit)
-        REMOTE_SUBDIR="dmz-rabbit"
-        FILES="DMZ/host.ini
+        subdir="dmz-rabbit"
+        bundle_files="DMZ/host.ini
 DMZ/path.inc
 DMZ/rabbitMQLib.inc
 DMZ/testRabbitMQ.ini
 DMZ/get_host_info.inc"
         ;;
     auth)
-        REMOTE_SUBDIR="auth"
-        FILES="frontend/login.php
+        subdir="auth"
+        bundle_files="frontend/login.php
 frontend/logout.php
 frontend/register.php
 frontend/register.html
@@ -55,28 +45,28 @@ frontend/client.php
 backend/server490v2.php"
         ;;
     cron)
-        REMOTE_SUBDIR="cron"
-        FILES="DMZ/datacollector.php
+        subdir="cron"
+        bundle_files="DMZ/datacollector.php
 backend/joblistener.php"
         ;;
     alerts)
-        REMOTE_SUBDIR="alerts"
-        FILES="frontend/send_email_alerts.php
+        subdir="alerts"
+        bundle_files="frontend/send_email_alerts.php
 frontend/save_alert_prefs.php
 DMZ/alertsender.php
 DMZ/PHPMailer
 backend/joblistener.php"
         ;;
     emp_features)
-        REMOTE_SUBDIR="emp_features"
-        FILES="frontend/employer.php
+        subdir="emp_features"
+        bundle_files="frontend/employer.php
 frontend/view_applicants.php
 frontend/my_postings.php
 frontend/post_job.php"
         ;;
     jseeker_features)
-        REMOTE_SUBDIR="jseeker_features"
-        FILES="frontend/jobseeker.php
+        subdir="jseeker_features"
+        bundle_files="frontend/jobseeker.php
 frontend/view_my_jobs.php
 frontend/save_job.php
 frontend/apply_job.php
@@ -86,31 +76,24 @@ frontend/upload_resume.php
 backend/server490v2.php"
         ;;
     roles)
-        REMOTE_SUBDIR="roles"
-        FILES="frontend/role_select.php
+        subdir="roles"
+        bundle_files="frontend/role_select.php
 frontend/set_role.php"
         ;;
     *)
-        echo "Unknown bundle: $BUNDLE"
+        echo "Unknown bundle: $bundle"
         exit 1
         ;;
 esac
 
-# Build archive name
-cd "$PROJECT_ROOT"
-ARCHIVE="${BUNDLE}.tar.gz"
+cd "$project_location"
+archive="${bundle}.tar.gz"
+tar czf "$archive" $bundle_files
+remote_dir="${bundles_dir}/${subdir}"
 
-echo "Creating $ARCHIVE..."
-tar czf "$ARCHIVE" $FILES   # bundle and compress files
+echo "Here"
+scp "$archive" "${dep_user}@${dep_ip}:${remote_dir}/"
+ssh "${dep_user}@${dep_ip}" "/home/cab7/Git/IT490/Deployment/register_bundle.sh '${bundle}'"
 
-# Remote directory for this bundle: /home/cab7/Bundles/<bundle-name>
-REMOTE_DIR="${DEPLOY_BASE_DIR}/${REMOTE_SUBDIR}"
-
-echo "Copying to ${DEPLOY_USER}@${DEPLOY_HOST}:${REMOTE_DIR}..."
-scp "$ARCHIVE" "${DEPLOY_USER}@${DEPLOY_HOST}:${REMOTE_DIR}/"
-
-echo "Calling register script on deployment VM..."
-ssh "${DEPLOY_USER}@${DEPLOY_HOST}" "/home/cab7/Git/IT490/Deployment/register_bundle.sh '${BUNDLE}'"
-
-echo "Bundle '${BUNDLE}'  has been registered into the DB"
+echo "Bundle '${bundle} is done'"
 
