@@ -1,62 +1,47 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -e
 
-########################################
-# DB settings (from register_bundle.sh)
-########################################
-DB_NAME="deployment"
-DB_USER="admin"
-DB_PASS="Chrisb200!"
-TABLE_NAME="bundle_deployments"
+db_name="deployment"
+db_user="admin"
+db_passwd="Chrisb200!"
+table="bundle_deployments"
+dep_user="deployment"
 
-########################################
-# QA cluster settings
-########################################
-SSH_USER="deployment"          # user on the QA VMs
+frontend_qa="100.70.27.95"   
+backend_qa="100.90.181.39"  
+dmz_qa="100.70.234.127"      
 
-# >>> EDIT THESE TO YOUR REAL QA HOSTNAMES / IPs <<<
-QA_FRONTEND_HOST="100.70.27.95"   # e.g. 192.168.195.101
-QA_BACKEND_HOST="100.90.181.39"   # e.g. 192.168.195.102
-QA_DMZ_HOST="100.70.234.127"      # e.g. 192.168.195.103
+app_path="/var/jobseek"
 
-QA_REMOTE_BASE="/var/jobseek"    # where the app lives on each QA VM
+mysql_fetch() { mysql -N -B -u "$db_user" -p"$db_passwd" "$db_name" -e "$1"}
 
-########################################
+echo "here"
 
-mysql_fetch() {
-  mysql -N -B -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "$1"
-}
-
-echo "[INFO] Looking for bundles with status='pending'..."
-rows=$(mysql_fetch "SELECT ID, bundle_name, file_path FROM $TABLE_NAME WHERE status='pending';")
+rows=$(mysql_fetch "SELECT ID, bundle_name, file_path FROM $table WHERE status='pending';")
 
 if [[ -z "$rows" ]]; then
   echo "[INFO] No pending bundles to deploy to QA."
   exit 0
 fi
 
-# Loop over each pending bundle
-while IFS=$'\t' read -r ID BUNDLE_NAME FILE_PATH; do
-  echo "=================================================="
-  echo "[INFO] Deploying bundle ID $ID ($BUNDLE_NAME)"
-  echo "[INFO] Local archive path: $FILE_PATH"
+while IFS=$'\t' read -r id bundle path; do
+  echo "Deploying bundle ID $id ($bundle)"
+  echo "Local archive path: $path"
 
-  if [[ ! -f "$FILE_PATH" ]]; then
-    echo "[ERROR] Archive file not found: $FILE_PATH"
-    echo "[WARN] Skipping bundle ID $ID"
+  if [[ ! -f "$path" ]]; then
+    echo "[ERROR] Archive file not found: $path"
+    echo "[WARN] Skipping bundle ID $id"
     continue
   fi
+  
+  echo "You are here"
+  archive="$(basename "$path")"
+  rem_archive="$app_path/$archive"
 
-  ARCHIVE_NAME="$(basename "$FILE_PATH")"
-  REMOTE_ARCHIVE="$QA_REMOTE_BASE/$ARCHIVE_NAME"
-
-  ########################################
-  # Map bundle name -> list of files
-  ########################################
-  FILES=()
-  case "$BUNDLE_NAME" in
+  bundle_files=()
+  case "$bundle" in
     frontend-rabbit)
-      FILES=(
+      bundle_files=(
         "frontend/get_host_info.inc"
         "frontend/host.ini"
         "frontend/path.inc"
@@ -66,7 +51,7 @@ while IFS=$'\t' read -r ID BUNDLE_NAME FILE_PATH; do
       )
       ;;
     backend-rabbit)
-      FILES=(
+      bundle_files=(
         "backend/host.ini"
         "backend/get_host_info.inc"
         "backend/path.inc"
@@ -74,7 +59,7 @@ while IFS=$'\t' read -r ID BUNDLE_NAME FILE_PATH; do
       )
       ;;
     dmz-rabbit)
-      FILES=(
+      bundle_files=(
         "DMZ/host.ini"
         "DMZ/path.inc"
         "DMZ/rabbitMQLib.inc"
@@ -83,7 +68,7 @@ while IFS=$'\t' read -r ID BUNDLE_NAME FILE_PATH; do
       )
       ;;
     auth)
-      FILES=(
+      bundle_files=(
         "frontend/login.php"
         "frontend/logout.php"
         "frontend/register.php"
@@ -93,13 +78,13 @@ while IFS=$'\t' read -r ID BUNDLE_NAME FILE_PATH; do
       )
       ;;
     cron)
-      FILES=(
+      bundle_files=(
         "DMZ/datacollector.php"
         "backend/joblistener.php"
       )
       ;;
     alerts)
-      FILES=(
+      bundle_files=(
         "frontend/send_email_alerts.php"
         "frontend/save_alert_prefs.php"
         "DMZ/alertsender.php"
@@ -108,7 +93,7 @@ while IFS=$'\t' read -r ID BUNDLE_NAME FILE_PATH; do
       )
       ;;
     emp_features)
-      FILES=(
+      bundle_files=(
         "frontend/employer.php"
         "frontend/view_applicants.php"
         "frontend/my_postings.php"
@@ -116,7 +101,7 @@ while IFS=$'\t' read -r ID BUNDLE_NAME FILE_PATH; do
       )
       ;;
     jseeker_features)
-      FILES=(
+      bundle_files=(
         "frontend/jobseeker.php"
         "frontend/view_my_jobs.php"
         "frontend/save_job.php"
@@ -128,86 +113,77 @@ while IFS=$'\t' read -r ID BUNDLE_NAME FILE_PATH; do
       )
       ;;
     roles)
-      FILES=(
+      bundle_files=(
         "frontend/role_select.php"
         "frontend/set_role.php"
       )
       ;;
     *)
-      echo "[WARN] Unknown bundle name '$BUNDLE_NAME'. Will extract full archive into $QA_REMOTE_BASE."
+      echo " Bad bundle name'"
       ;;
   esac
 
-  # Deploy to all three QA VMs
-  for HOST in "$QA_FRONTEND_HOST" "$QA_DMZ_HOST"; do
-    echo "[INFO] --- QA host: $HOST ---"
+  for machine in "$frontend_qa" "$backend_qa" "$dmz_qa"; do
+    echo "Machine: $machine "
 
-    # Ensure remote base directory exists
-    ssh "${SSH_USER}@${HOST}" "mkdir -p '$QA_REMOTE_BASE'"
+    ssh "${dep_user}@${machine}" "mkdir -p '$app_path'"
+    
+    echo "You are here"
+    echo "Copying to $machine:$rem_archive..."
+    scp "$path" "${dep_user}@${machine}:$rem_archive"
 
-    echo "[INFO] Copying archive to $HOST:$REMOTE_ARCHIVE..."
-    scp "$FILE_PATH" "${SSH_USER}@${HOST}:$REMOTE_ARCHIVE"
+    if [[ ${#bundle_files[@]} -gt 0 ]]; then
+      echo "Extracting and placing specific files for bundle $bundle on $machine..."
 
-    # If we have a specific file list for this bundle, use temp dir + targeted moves
-    if [[ ${#FILES[@]} -gt 0 ]]; then
-      echo "[INFO] Extracting and placing specific files for bundle $BUNDLE_NAME on $HOST..."
-
-      ssh "${SSH_USER}@${HOST}" 'bash -s' <<EOF
+      ssh "${dep_user}@${machine}" 'bash -s' <<EOF
 set -e
-QA_REMOTE_BASE="$QA_REMOTE_BASE"
-ARCHIVE="$REMOTE_ARCHIVE"
-TMP_DIR="\$QA_REMOTE_BASE/.tmp_${BUNDLE_NAME}_$ID"
+app_path="$app_path"
+archive="$rem_archive"
+temp_dir="\$app_path/.tmp_${bundle}_$id"
 
-echo "[REMOTE] Using temp dir: \$TMP_DIR"
-rm -rf "\$TMP_DIR"
-mkdir -p "\$TMP_DIR"
+echo " Using temp dir: \$temp_dir"
+rm -rf "\$temp_dir"
+mkdir -p "\$temp_dir"
 
-# Unpack archive into temp dir
-tar xzf "\$ARCHIVE" -C "\$TMP_DIR"
+tar xzf "\$archive" -C "\$temp_dir"
 
-# Files for this bundle:
-FILES=(
-$(for f in "${FILES[@]}"; do printf '  "%s"\n' "$f"; done)
+bundle_files=(
+$(for f in "${bundle_files[@]}"; do printf '  "%s"\n' "$f"; done)
 )
 
-for rel in "\${FILES[@]}"; do
-  src="\$TMP_DIR/\$rel"
-  dest="\$QA_REMOTE_BASE/\$rel"
+for rel in "\${bundle_files[@]}"; do
+  src="\$temp_dir/\$rel"
+  dest="$app_path/\$rel"
   dest_dir=\$(dirname "\$dest")
   mkdir -p "\$dest_dir"
 
   if [[ -e "\$src" ]]; then
-    echo "[REMOTE] Installing \$rel -> \$dest"
-    # Move file/dir into place
     rm -rf "\$dest"
     mv "\$src" "\$dest"
   else
-    echo "[REMOTE][WARN] File not found in archive: \$rel"
+    echo "Bad file"
   fi
 done
 
-# Clean up temp and (optionally) the archive
-rm -rf "\$TMP_DIR"
-# rm -f "\$ARCHIVE"
+
+rm -rf "\$temp_dir"
+rm -f "\$archive"
 EOF
 
     else
-      # Fallback: old behavior – just extract everything into /var/jobseek
-      echo "[INFO] No specific file mapping for bundle '$BUNDLE_NAME', extracting entire archive into $QA_REMOTE_BASE on $HOST..."
-      ssh "${SSH_USER}@${HOST}" "cd '$QA_REMOTE_BASE' && tar xzf '$REMOTE_ARCHIVE'"
-      # Optional: ssh "${SSH_USER}@${HOST}" "rm -f '$REMOTE_ARCHIVE'"
+      echo " No destination, just gonna put it there and you'll see it"
+      ssh "${dep_user}@${machine}" "cd '$app_path' && tar xzf '$rem_archive'"
     fi
 
-    echo "[INFO] Bundle $BUNDLE_NAME processed on $HOST."
+    echo " Bundle $bundle processed on $machine."
   done
 
-  echo "[INFO] Updating DB status -> 'deployed' for bundle ID $ID..."
-  mysql_fetch "UPDATE $TABLE_NAME SET status='deployed' WHERE ID=$ID;"
+  echo " Changing status to deployed for bundle ID $id"
+  mysql_fetch "UPDATE $table SET status='deployed' WHERE ID=$id;"
 
-  echo "[INFO] Bundle ID $ID deployment to QA complete."
+  echo " Bundle ID $id is deployed"
 
 done <<< "$rows"
 
-echo "=================================================="
-echo "[INFO] All pending bundles deployed to QA."
+echo " FInally done"
 
