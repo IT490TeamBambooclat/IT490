@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Register Page</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -79,11 +82,52 @@
       font-weight: bold;
       color: #004080;
     }
+
+
+
+    .menu-toggle {
+      display: none;
+      font-size: 28px;
+      color: white;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+
+      .navbar a {
+        display: none;
+      }
+
+      .navbar.active a {
+        display: block;
+        margin-top: 10px;
+      }
+
+      .container {
+        width: 90%;
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        width: 95%;
+        padding: 15px;
+      }
+    }
+
   </style>
 </head>
 <body>
 
   <div class="navbar">
+
+    <!-- ADDED -->
+    <div class="menu-toggle" onclick="document.querySelector('.navbar').classList.toggle('active')">☰</div>
+
     <a href="index.html">🏢 JobConnect</a>
     <div>
       <a href="index.html">Home</a>
@@ -165,5 +209,12 @@ function sendRegisterRequest() {
   );
 }
 </script>
+
+<script>
+function toggleMenu() {
+    document.querySelector('.navbar').classList.toggle('active');
+}
+</script>
+
 </body>
 </html>
