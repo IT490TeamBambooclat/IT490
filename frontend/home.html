@@ -11,6 +11,9 @@ $username = htmlspecialchars($_SESSION['username']);
 <head>
     <meta charset="UTF-8">
     <title>Home - Welcome <?php echo $username; ?></title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -87,6 +90,65 @@ $username = htmlspecialchars($_SESSION['username']);
         .logout-btn:hover {
             background-color: #c9302c;
         }
+
+
+
+        .menu-toggle {
+            display: none;
+            font-size: 26px;
+            color: white;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: row;
+            }
+
+            .menu {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background-color: #004080;
+                padding: 10px 0;
+                text-align: center;
+            }
+
+            .menu a {
+                margin: 10px 0;
+                font-size: 18px;
+            }
+
+            .menu.active {
+                display: flex;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .container {
+                width: 90%;
+                padding: 20px;
+                margin: 40px auto;
+            }
+
+            .navbar h1 {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h2 {
+                font-size: 20px;
+            }
+
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -96,6 +158,10 @@ $username = htmlspecialchars($_SESSION['username']);
         <img src="logo.png" alt="Company Logo">
         <h1>JobConnect</h1>
     </div>
+
+    <!-- ADDED HAMBURGER BUTTON -->
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
     <div class="menu">
         <a href="home.php">Home</a>
         <a href="recommendations.php">Recommendations</a>
@@ -114,6 +180,11 @@ $username = htmlspecialchars($_SESSION['username']);
     </form>
 </div>
 
+<script>
+function toggleMenu() {
+    document.querySelector('.menu').classList.toggle('active');
+}
+</script>
+
 </body>
 </html>
-
