@@ -2,13 +2,15 @@
 <html>
 <head>
     <title>JobConnect Login Page</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             background-color: #f9f9f9;
         }
-
 
         .navbar {
             background-color: #004080;
@@ -45,7 +47,6 @@
             text-decoration: underline;
         }
 
-   
         .intro {
             max-width: 800px;
             margin: 40px auto 20px auto;
@@ -72,14 +73,8 @@
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes textFadeIn {
@@ -87,7 +82,6 @@
             100% { opacity: 1; transform: translateY(0); }
         }
 
-   
         .container {
             max-width: 400px;
             margin: 40px auto 60px auto;
@@ -144,6 +138,64 @@
         .info-text a:hover {
             text-decoration: underline;
         }
+
+
+
+        .menu-toggle {
+            display: none;
+            font-size: 26px;
+            color: white;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .menu {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background-color: #004080;
+                text-align: center;
+                padding: 10px 0;
+            }
+
+            .menu.active {
+                display: flex;
+            }
+
+            .menu a {
+                margin: 10px 0;
+                font-size: 18px;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .intro {
+                width: 90%;
+                padding: 20px;
+            }
+
+            .container {
+                width: 90%;
+                padding: 20px;
+            }
+
+            .navbar h1 {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h2 {
+                font-size: 20px;
+            }
+
+            .intro, .container {
+                width: 95%;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -153,13 +205,15 @@
             <img src="logo.png" alt="Company Logo"> 
             <h1>JobConnect</h1>
         </div>
+
+        <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
         <div class="menu">
             <a href="index.html">Home</a>
             <a href="register.html">Register</a>
         </div>
     </div>
 
-   
     <div class="intro">
         <h2>Welcome to JobConnect</h2>
         <p><strong>JobConnect</strong> is your all-in-one career platform designed to simplify your job search. 
@@ -185,6 +239,12 @@
             If you are a new user, please select the <a href="register.html">Register</a> button to create a new account.
         </p>
     </div>
+
+<script>
+function toggleMenu() {
+    document.querySelector('.menu').classList.toggle('active');
+}
+</script>
 
 </body>
 </html>
