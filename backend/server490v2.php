@@ -21,7 +21,7 @@ function dlog($error)
 		$client->publish($request);
 	}catch (Exception $e)
 	{
-		error_log("DLogging Failed").$e->getMessage());
+		error_log("DLogging Failed".$e->getMessage());
 	}
 }
 
