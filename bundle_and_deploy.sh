@@ -38,6 +38,7 @@ DMZ/get_host_info.inc"
     auth)
         subdir="auth"
         bundle_files="frontend/login.php
+frontend/login.php
 frontend/logout.php
 frontend/register.php
 frontend/register.html

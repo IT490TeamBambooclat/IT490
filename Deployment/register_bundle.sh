@@ -31,7 +31,7 @@ version_num=$(mysql -N -u "$db_user" -p"$db_pass" "$db_name" -e "
 ")
 
 
-result_archive="${bundle_dir}/${bundle}_v${version_num}.tar.gz"
+result_archive="${bundles_dir}/${bundle}/${bundle}_v${version_num}.tar.gz"
 mv "$archive" "$result_archive"
 
 echo "Here"

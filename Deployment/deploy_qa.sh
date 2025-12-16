@@ -13,7 +13,7 @@ dmz_qa="100.70.234.127"
 
 app_path="/var/jobseek"
 
-mysql_fetch() { mysql -N -B -u "$db_user" -p"$db_passwd" "$db_name" -e "$1"}
+mysql_fetch() { mysql -N -B -u "$db_user" -p"$db_passwd" "$db_name" -e "$1";}
 
 echo "here"
 
@@ -37,7 +37,7 @@ while IFS=$'\t' read -r id bundle path; do
   echo "You are here"
   archive="$(basename "$path")"
   rem_archive="$app_path/$archive"
-
+ echo "$archive"
   bundle_files=()
   case "$bundle" in
     frontend-rabbit)
@@ -70,6 +70,7 @@ while IFS=$'\t' read -r id bundle path; do
     auth)
       bundle_files=(
         "frontend/login.php"
+	"frontend/login.php"
         "frontend/logout.php"
         "frontend/register.php"
         "frontend/register.html"
@@ -184,6 +185,5 @@ EOF
   echo " Bundle ID $id is deployed"
 
 done <<< "$rows"
-
 echo " FInally done"
 
