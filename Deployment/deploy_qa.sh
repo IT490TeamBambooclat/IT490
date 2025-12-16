@@ -46,7 +46,6 @@ while IFS=$'\t' read -r id bundle path; do
         "frontend/host.ini"
         "frontend/path.inc"
         "frontend/rabbitMQLib.inc"
-        "frontend/testRabbitMQ.ini"
         "frontend/testRabbitMQServer.conf"
       )
       ;;
@@ -55,7 +54,6 @@ while IFS=$'\t' read -r id bundle path; do
         "backend/host.ini"
         "backend/get_host_info.inc"
         "backend/path.inc"
-        "backend/testRabbitMQ.ini"
       )
       ;;
     dmz-rabbit)
@@ -63,7 +61,6 @@ while IFS=$'\t' read -r id bundle path; do
         "DMZ/host.ini"
         "DMZ/path.inc"
         "DMZ/rabbitMQLib.inc"
-        "DMZ/testRabbitMQ.ini"
         "DMZ/get_host_info.inc"
       )
       ;;
