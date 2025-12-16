@@ -1,11 +1,10 @@
 #!/usr/bin/php
 <?php
-// Configuration for RabbitMQ Client
 require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
-// Require PHPMailer files
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -13,28 +12,69 @@ require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
 
-$JOB_QUEUE_SERVER = "DmzInfo"; // Target listener on DB VM
+$JOB_QUEUE_SERVER = "DmzInfo"; 
+
+
+function dlog($error)
+{
+	error_log($error);
+	try
+	{
+		
+		$client=new rabbitMQClient("testRabbitMQ.ini",'DLogging'); 
+		$request= 
+		[
+			'type' => 'dlog',
+			'timestamp'=> date('Y-m-d H:i:s'),
+			'source_host' => gethostname(),
+			'message' => $error
+		];
+		$client->publish($request);
+	}catch (Exception $e)
+	{
+		// Log dat og error message
+		error_log("DLogging Failed bruh: " . $error . " - " . $e->getMessage());
+	}
+}
+
 
 function sendJobAlerts() {
     global $JOB_QUEUE_SERVER;
 
     error_log("Starting job alert sender...");
-
+    dlog("Starting dat job sender process."); 
    
-    $client = new rabbitMQClient("testRabbitMQ.ini", $JOB_QUEUE_SERVER);
+   
+    try {
+        $client = new rabbitMQClient("testRabbitMQ.ini", $JOB_QUEUE_SERVER);
+    } catch (Exception $e) {
+        $error_msg = "RabbitMQ Client Initialization Failed: " . $e->getMessage();
+        dlog($error_msg);
+        error_log($error_msg);
+        return false;
+    }
     
     $request = [
         'type' => 'get_alert_emails', 
         'message' => 'Requesting list of users enabled for job alerts'
     ];
     
-    // Send request to the Database VM listener
-    $response = $client->send_request($request); 
+    
+    try {
+        $response = $client->send_request($request); 
+    } catch (Exception $e) {
+        $error_msg = "RabbitMQ Request (get_alert_emails) Failed: " . $e->getMessage();
+        dlog($error_msg); 
+        error_log($error_msg);
+        return false;
+    }
     
     error_log("Received response from DB Listener: " . json_encode($response));
 
     if (!isset($response['returnCode']) || $response['returnCode'] !== 0 || !isset($response['emails'])) {
-        error_log("ERROR: Failed to retrieve emails from the database server.");
+        $error_msg = "ERROR: Failed to retrieve emails from the database server. Response: " . json_encode($response);
+        dlog($error_msg); 
+        error_log($error_msg);
         return false;
     }
 
@@ -58,9 +98,9 @@ function sendJobAlerts() {
             // Sender 
             $mail->setFrom('teambamboclaat@gmail.com', 'Job Alerts Service');
 
-     -
+     
 
-            // Content
+            
             $mail->isHTML(true);                                  
             $mail->Subject = 'Your Daily Personalized Job Alert!';
             $mail->Body    = '<b>Hello User,</b><p>Here are your personalized job recommendations...</p>';
@@ -70,7 +110,7 @@ function sendJobAlerts() {
             // Loop through all retrieved emails and send the alert
             foreach ($emails as $email) {
                 try {
-                    // Clear previous recipient and add current one
+                    
                     $mail->clearAllRecipients(); 
                     $mail->addAddress($email); 
                     
@@ -78,22 +118,33 @@ function sendJobAlerts() {
                         $success_count++;
                         error_log("Mail sent successfully to: $email");
                     } else {
-                        error_log("Mail NOT sent to: $email. Mailer Error: " . $mail->ErrorInfo);
+                        
+                        $mailer_error = "Mail NOT sent to: $email. Mailer Error: " . $mail->ErrorInfo;
+                        dlog($mailer_error);
+                        error_log($mailer_error);
                     }
                 } catch (Exception $e) {
-                    error_log("Mail NOT sent to: $email. Exception: " . $e->getMessage());
+                    
+                    $email_exception = "Mail AINT send shit to: $email. Exception: " . $e->getMessage();
+                    dlog($email_exception);
+                    error_log($email_exception);
                 }
             }
 
-            error_log("Finished sending alerts. Total sent successfully: $success_count out of $num_emails.");
+            error_log("Finished sending alerts. Total: $success_count out of $num_emails.");
+            dlog("Alerts finished. Total: $success_count out of $num_emails.");
             return true;
 
         } catch (Exception $e) {
-            error_log("PHPMailer setup or fatal error: " . $e->getMessage());
+            // Log PHPMailer setup or fatal error
+            $fatal_error = "PHPMailer setup or fatal error: " . $e->getMessage();
+            dlog($fatal_error);
+            error_log($fatal_error);
             return false;
         }
     } else {
-        error_log("No enabled users found. Skipping mail process.");
+        error_log("No enabled users found bruh");
+        dlog("No enabled users found.");
         return true;
     }
 }
