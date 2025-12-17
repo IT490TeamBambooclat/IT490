@@ -2,6 +2,26 @@
 session_start();
 require_once('api_rabbitmq_client.php');
 
+function dlog($error)
+{
+	error_log($error);
+	try
+	{
+		$client=new rabbitMQClient("testRabbitMQ.ini",'DLogging');
+		$request= 
+		[
+			'type' => 'dlog',
+			'timestamp'=> date('Y-m-d H:i:s'),
+			'source_host' => gethostname(),
+			'message' => $error
+		];
+		$client->publish($request);
+	}catch (Exception $e)
+	{
+		error_log("DLogging Failed".$e->getMessage());
+	}
+}
+
 if (!isset($_SESSION['username'])) {
     header("Location: index.html");
     exit;
@@ -15,6 +35,10 @@ $username = htmlspecialchars($_SESSION['username']);
 
 $resume_request = ['type' => 'get_resume_path', 'username' => $username];
 $resume_response = mq_request($resume_request);
+
+if ($resume_response === false || isset($resume_response['error'])) {
+    dlog("Failed to fetch resume path for user: $username. Response: " . json_encode($resume_response));
+}
 
 $resume_file_path = '';
 if (is_array($resume_response) && !empty($resume_response['file_path'])) {
