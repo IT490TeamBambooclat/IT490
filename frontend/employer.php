@@ -2,14 +2,38 @@
 session_start();
 require_once('api_rabbitmq_client.php');
 
+function dlog($error)
+{
+    error_log($error);
+    try
+    {
+        $client = new rabbitMQClient("testRabbitMQ.ini", 'DLogging');
+        $request = [
+            'type' => 'dlog',
+            'timestamp' => date('Y-m-d H:i:s'),
+            'source_host' => gethostname(),
+            'message' => $error
+        ];
+        $client->publish($request);
+    }
+    catch (Exception $e)
+    {
+        error_log("DLogging Failed: " . $e->getMessage());
+    }
+}
+
 if (!isset($_SESSION['username'])) {
+    dlog("Unauthorized access attempt: No session username found.");
     header("Location: index.html");
     exit;
 }
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'employer') {
+    dlog("Role mismatch: User " . $_SESSION['username'] . " attempted to access employer dashboard with role " . ($_SESSION['role'] ?? 'none'));
     header("Location: index.html?error=invalid_role_access");
     exit;
 }
+
 $username = htmlspecialchars($_SESSION['username']);
 ?>
 <!DOCTYPE html>
@@ -75,14 +99,19 @@ a.button-link:hover {
         </form>
     </div>
 
-
     <div class="panel">
         <h3>Applicants for Your Jobs</h3>
         <a href="view_applicants.php" class="button-link">View Applicants</a>
     </div>
 </div>
 
-<?php include('chat_widget.php'); ?>
+<?php 
+try {
+    include('chat_widget.php');
+} catch (Exception $e) {
+    dlog("Error loading chat widget: " . $e->getMessage());
+}
+?>
 
 </body>
 </html>
