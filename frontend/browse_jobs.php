@@ -2,13 +2,29 @@
 session_start();
 require_once('api_rabbitmq_client.php');
 
+function dlog($error)
+{
+    error_log($error);
+    try {
+        $client = new rabbitMQClient("testRabbitMQ.ini", 'DLogging');
+        $request = [
+            'type' => 'dlog',
+            'timestamp' => date('Y-m-d H:i:s'),
+            'source_host' => gethostname(),
+            'message' => $error
+        ];
+        $client->publish($request);
+    } catch (Exception $e) {
+        error_log("DLogging Failed" . $e->getMessage());
+    }
+}
+
 if (!isset($_SESSION['username'])) {
     header("Location: index.html");
     exit;
 }
 
 $username = $_SESSION['username'];
-
 $employer_filter = null;
 $page_title = "All Openings";
 
@@ -23,7 +39,15 @@ $request = [
     'organization' => $employer_filter
 ];
 
-$response = mq_request($request);
+try {
+    $response = mq_request($request);
+    if (!$response || is_string($response)) {
+        dlog("Job browse error or empty response for user $username. Response: " . print_r($response, true));
+    }
+} catch (Exception $e) {
+    dlog("MQ Request Failure in browse: " . $e->getMessage());
+    $response = null;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -72,22 +96,10 @@ body {
     display: inline-block;
     transition: background 0.2s;
 }
-
-.apply-btn {
-    background-color: #28a745;
-}
-
-.save-btn:hover, .visit-btn:hover {
-    background-color: #0066cc;
-}
-
-.apply-btn:hover {
-    background-color: #218838;
-}
-
-.top-links {
-    margin-bottom: 20px;
-}
+.apply-btn { background-color: #28a745; }
+.save-btn:hover, .visit-btn:hover { background-color: #0066cc; }
+.apply-btn:hover { background-color: #218838; }
+.top-links { margin-bottom: 20px; }
 .top-links a {
     text-decoration: none;
     background: #004080;
@@ -97,9 +109,7 @@ body {
     margin-right: 10px;
     transition: background 0.2s;
 }
-.top-links a:hover {
-    background: #0066cc;
-}
+.top-links a:hover { background: #0066cc; }
 </style>
 </head>
 <body>
@@ -139,7 +149,6 @@ if (!$response || empty($response) || is_string($response)) {
         echo "<button class='apply-btn track-apply-btn' data-jobid='{$position_id}' data-uri='{$external}'>Mark as Applied</button>";
         echo "<a href='{$external}' target='_blank' class='visit-btn'>Visit Website</a>";
         echo "<button class='save-btn' data-position-id='{$position_id}' data-username='{$username}'>Save Job</button>";
-        
         echo "</div>";
     }
 }
@@ -168,9 +177,7 @@ document.querySelectorAll('.save-btn').forEach(button => {
 document.querySelectorAll('.track-apply-btn').forEach(button => {
     button.addEventListener('click', (e) => {
         const jobID = button.dataset.jobid;
-
         if (!jobID) return;
-
         fetch('apply_job.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -178,17 +185,17 @@ document.querySelectorAll('.track-apply-btn').forEach(button => {
         })
         .then(res => {
             if (res.ok) {
-                alert('Job marked as Applied! You can visit the website using the "Visit Website" button if you haven\'t already.');
+                alert('Job marked as Applied!');
                 button.disabled = true;
                 button.textContent = 'Applied (Tracked)';
             } else {
-                console.error('Apply tracking failed with status:', res.status);
-                alert('Tracking failed, but you can try again or apply directly using the "Visit Website" button.');
+                console.error('Apply tracking failed');
+                alert('Tracking failed.');
             }
         })
         .catch(err => {
             console.error('Apply tracking failed:', err);
-            alert('A network error occurred while tracking the application.');
+            alert('A network error occurred.');
         });
     });
 });

@@ -3,6 +3,26 @@ require_once('path.inc');
 require_once('get_host_info.inc');
 require_once('rabbitMQLib.inc');
 
+function dlog($error)
+{
+    error_log($error);
+    try
+    {
+        $client = new rabbitMQClient("testRabbitMQ.ini", 'DLogging');
+        $request = [
+            'type' => 'dlog',
+            'timestamp' => date('Y-m-d H:i:s'),
+            'source_host' => gethostname(),
+            'message' => $error
+        ];
+        $client->publish($request);
+    }
+    catch (Exception $e)
+    {
+        error_log("DLogging Failed: " . $e->getMessage());
+    }
+}
+
 session_start();
 
 if (!isset($_SESSION['username']) || !isset($_SESSION['session_id'])) {
@@ -10,18 +30,22 @@ if (!isset($_SESSION['username']) || !isset($_SESSION['session_id'])) {
     exit;
 }
 
-$client = new rabbitMQClient('testRabbitMQ.ini', 'testServer');
-$validation_request = [
-    'type' => 'validate_session',
-    'sessionId' => $_SESSION['session_id']
-];
-$is_session_valid = $client->send_request($validation_request);
+try {
+    $client = new rabbitMQClient('testRabbitMQ.ini', 'testServer');
+    $validation_request = [
+        'type' => 'validate_session',
+        'sessionId' => $_SESSION['session_id']
+    ];
+    $is_session_valid = $client->send_request($validation_request);
 
-if ($is_session_valid !== true) {
-    session_unset();
-    session_destroy();
-    header('Location: index.html?error=session_expired');
-    exit;
+    if ($is_session_valid !== true) {
+        session_unset();
+        session_destroy();
+        header('Location: index.html?error=session_expired');
+        exit;
+    }
+} catch (Exception $e) {
+    dlog("Session validation failed for user " . $_SESSION['username'] . ": " . $e->getMessage());
 }
 
 $username = htmlspecialchars($_SESSION['username'], ENT_QUOTES, 'UTF-8');
@@ -30,10 +54,15 @@ $email_enabled = 0;
 $email_value = '';
 
 if (file_exists($prefs_file)) {
-    $data = json_decode(file_get_contents($prefs_file), true);
-    if (isset($data[$_SESSION['username']])) {
-        $email_enabled = $data[$_SESSION['username']]['email_enabled'] ?? 0;
-        $email_value = $data[$_SESSION['username']]['email'] ?? '';
+    $file_content = file_get_contents($prefs_file);
+    if ($file_content === false) {
+        dlog("Failed to read prefs file: $prefs_file");
+    } else {
+        $data = json_decode($file_content, true);
+        if (isset($data[$_SESSION['username']])) {
+            $email_enabled = $data[$_SESSION['username']]['email_enabled'] ?? 0;
+            $email_value = $data[$_SESSION['username']]['email'] ?? '';
+        }
     }
 }
 ?>
@@ -149,4 +178,3 @@ if (file_exists($prefs_file)) {
 
 </body>
 </html>
-
