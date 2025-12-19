@@ -64,7 +64,7 @@ while IFS=$'\t' read -r id bundle path; do
       ;;
     auth)
       bundle_files=(
-        "frontend/login.php"
+	"index.html"
 	"frontend/login.php"
         "frontend/logout.php"
         "frontend/register.php"
